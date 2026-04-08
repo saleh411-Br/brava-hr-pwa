@@ -13,13 +13,43 @@
 </head>
 <body>
 
+<!-- ═══ LOCK SCREEN ═══ -->
+<div id="lockscreen">
+  <div class="lock-card">
+    <div class="lock-logo">
+      <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1a237e"/><text x="32" y="46" text-anchor="middle" fill="white" font-size="36" font-weight="900" font-family="serif">B</text></svg>
+    </div>
+    <h2 class="lock-title">BRAVA HR</h2>
+    <p class="lock-sub">Enter your PIN to continue</p>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div id="pin-error" class="pin-error"></div>
+    <div class="pin-pad">
+      <button class="pin-btn" onclick="pinInput(1)">1</button>
+      <button class="pin-btn" onclick="pinInput(2)">2</button>
+      <button class="pin-btn" onclick="pinInput(3)">3</button>
+      <button class="pin-btn" onclick="pinInput(4)">4</button>
+      <button class="pin-btn" onclick="pinInput(5)">5</button>
+      <button class="pin-btn" onclick="pinInput(6)">6</button>
+      <button class="pin-btn" onclick="pinInput(7)">7</button>
+      <button class="pin-btn" onclick="pinInput(8)">8</button>
+      <button class="pin-btn" onclick="pinInput(9)">9</button>
+      <button class="pin-btn pin-btn-clear" onclick="pinClear()">⌫</button>
+      <button class="pin-btn" onclick="pinInput(0)">0</button>
+      <button class="pin-btn pin-btn-ok" onclick="pinSubmit()">✓</button>
+    </div>
+    <p class="pin-hint">Default PIN: <strong>1234</strong> — Change in Settings</p>
+  </div>
+</div>
+
 <!-- Splash -->
 <div id="splash">
-  <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-    <rect width="120" height="120" rx="28" fill="#ffffff20"/>
-    <text x="60" y="75" text-anchor="middle" fill="white" font-size="52" font-weight="900" font-family="serif">B</text>
-  </svg>
-  <h1>BRAVA</h1>
+  <svg width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="rgba(255,255,255,.15)"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="52" font-weight="900" font-family="serif">B</text></svg>
+  <h1>BRAVA HR</h1>
   <p>HR Management System</p>
 </div>
 
@@ -27,47 +57,48 @@
 <div id="toast" class="toast"></div>
 
 <!-- Main App -->
-<div id="app">
+<div id="app" style="display:none">
 
   <!-- Top Bar -->
   <div class="topbar">
     <span id="topbar-title" class="topbar-title">Dashboard</span>
     <div class="topbar-actions">
-      <button class="topbar-btn" onclick="loadDashboard()" title="Refresh">↻</button>
+      <button class="topbar-btn" onclick="refreshPage()" title="Refresh">↻</button>
+      <button class="topbar-btn" onclick="lockApp()" title="Lock">🔒</button>
     </div>
   </div>
 
   <!-- Content -->
   <div class="content">
 
-    <!-- ═══ DASHBOARD PAGE ═══ -->
+    <!-- ═══ DASHBOARD ═══ -->
     <div id="page-dashboard" class="page active">
       <div id="dash-stats"><div class="loading"><div class="spinner"></div><p>Loading…</p></div></div>
-
       <div class="section-label">On Vacation Now</div>
-      <div class="card" style="padding:12px">
-        <div id="dash-vac"></div>
-      </div>
-
+      <div class="card" style="padding:12px"><div id="dash-vac"></div></div>
       <div class="section-label">Expiry Alerts (≤30 days)</div>
-      <div class="card" style="padding:12px">
-        <div id="dash-alerts"></div>
-      </div>
+      <div class="card" style="padding:12px"><div id="dash-alerts"></div></div>
     </div>
 
-    <!-- ═══ EMPLOYEES PAGE ═══ -->
+    <!-- ═══ EMPLOYEES ═══ -->
     <div id="page-employees" class="page">
-      <div class="search-wrap">
-        <input id="emp-search" type="search" placeholder="Search name or employee number…" />
-        <span class="search-icon">🔍</span>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="search-wrap" style="flex:1;margin-bottom:0">
+          <input id="emp-search" type="search" placeholder="Search name or employee number…" />
+          <span class="search-icon">🔍</span>
+        </div>
+        <button class="btn btn-primary" style="white-space:nowrap;padding:12px 14px" onclick="openAddEmployee()">＋ Add</button>
       </div>
       <div id="emp-list">
         <div class="empty"><div class="empty-icon">🔍</div><p>Search by name or employee number</p></div>
       </div>
     </div>
 
-    <!-- ═══ NEW HIRES PAGE ═══ -->
+    <!-- ═══ NEW HIRES ═══ -->
     <div id="page-hires" class="page">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button class="btn btn-primary" style="padding:10px 16px" onclick="openAddHire()">＋ Add Hire</button>
+      </div>
       <div class="chip-row" id="hire-chips">
         <div class="chip active" data-status="All" onclick="loadHires('All')">All</div>
         <div class="chip" data-status="Active" onclick="loadHires('Active')">Active</div>
@@ -78,11 +109,10 @@
       <div id="hire-list"></div>
     </div>
 
-    <!-- ═══ PAYROLL PAGE ═══ -->
-    <div id="page-payroll" class="page">
-    </div>
+    <!-- ═══ PAYROLL ═══ -->
+    <div id="page-payroll" class="page"></div>
 
-    <!-- ═══ SETTINGS PAGE ═══ -->
+    <!-- ═══ SETTINGS ═══ -->
     <div id="page-settings" class="page">
       <div class="card">
         <div class="card-header"><span class="card-title">⚙️ API Configuration</span></div>
@@ -100,21 +130,36 @@
       </div>
 
       <div class="card">
+        <div class="card-header"><span class="card-title">🔒 Change PIN</span></div>
+        <div class="form-group"><label>Current PIN</label><input id="cur-pin" type="password" maxlength="6" placeholder="Current PIN" /></div>
+        <div class="form-group"><label>New PIN (4–6 digits)</label><input id="new-pin" type="password" maxlength="6" placeholder="New PIN" /></div>
+        <div class="form-group"><label>Confirm New PIN</label><input id="conf-pin" type="password" maxlength="6" placeholder="Confirm PIN" /></div>
+        <button class="btn btn-primary" onclick="changePin()">🔒 Update PIN</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">🛠️ Tools</span></div>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px" onclick="runRefreshAll()">🔔 Refresh All Data (Sheet)</button>
+        <button class="btn btn-secondary" style="width:100%" onclick="fixMissingHeaders()">🔧 Fix Missing Column Headers</button>
+      </div>
+
+      <div class="card">
         <div class="card-header"><span class="card-title">📱 Install App</span></div>
         <p style="font-size:13px;color:var(--muted);line-height:1.6">
-          On Android: tap the browser menu (⋮) → <strong>Add to Home Screen</strong><br>
-          On iOS: tap Share (⬆️) → <strong>Add to Home Screen</strong>
+          <strong>Android:</strong> Tap ⋮ menu → Add to Home Screen<br>
+          <strong>iPhone:</strong> Tap ⬆️ Share → Add to Home Screen
         </p>
       </div>
 
       <div class="card">
         <div class="card-header"><span class="card-title">ℹ️ About</span></div>
-        <div class="settings-row"><div><div class="settings-label">Version</div><div class="settings-sub">Brava HR PWA v1.0</div></div></div>
-        <div class="settings-row"><div><div class="settings-label">Branches</div><div class="settings-sub">DMM · QTF · TRT</div></div></div>
+        <div style="font-size:13px;color:var(--muted);line-height:2">
+          Brava HR PWA v2.0<br>Branches: DMM · QTF · TRT
+        </div>
       </div>
     </div>
 
-  </div><!-- /content -->
+  </div>
 
   <!-- Bottom Navigation -->
   <nav class="bottomnav">
@@ -134,22 +179,228 @@
       <div class="nav-icon">⚙️</div>Settings
     </button>
   </nav>
+</div>
 
-</div><!-- /app -->
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE PANELS
+═══════════════════════════════════════════════════════ -->
 
-
-<!-- ═══ SLIDE PANELS ═══ -->
-
-<!-- Employee Detail Panel -->
+<!-- Employee Detail -->
 <div id="panel-emp" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-emp')">‹</button>
     <span id="panel-emp-title" class="panel-title">Employee</span>
+    <button class="topbar-btn" onclick="openEditEmployee()" title="Edit">✏️</button>
   </div>
   <div class="panel-body" id="panel-emp-body"></div>
 </div>
 
-<!-- Hire Detail Panel -->
+<!-- Add Employee -->
+<div id="panel-add-emp" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-add-emp')">‹</button>
+    <span class="panel-title">Add New Employee</span>
+  </div>
+  <div class="panel-body">
+    <form id="add-emp-form" onsubmit="return false">
+      <div class="section-label">Personal Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Name (EN) *</label><input id="ae-nameEn" /></div>
+        <div class="form-group"><label>Name (AR)</label><input id="ae-nameAr" dir="rtl" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gender</label>
+          <select id="ae-gender"><option>Male</option><option>Female</option></select></div>
+        <div class="form-group"><label>Nationality</label><input id="ae-nationality" /></div>
+      </div>
+      <div class="form-group"><label>ID / Iqama No.</label><input id="ae-idNo" /></div>
+      <div class="upload-section"><span class="upload-section-label">📄 ID / Iqama Copy</span><div id="upload-ae-id"></div><input type="hidden" id="ae-copyId" /></div>
+      <div class="upload-section"><span class="upload-section-label">🛂 Passport Copy</span><div id="upload-ae-passport"></div><input type="hidden" id="ae-copyPassport" /></div>
+      <div class="form-group"><label>Passport No.</label><input id="ae-passportNo" /></div>
+      <div class="form-group"><label>Date of Birth</label><input id="ae-dob" type="date" /></div>
+
+      <div class="section-label">Employment</div>
+      <div class="form-row">
+        <div class="form-group"><label>Job Title *</label><input id="ae-jobTitle" /></div>
+        <div class="form-group"><label>Branch *</label><input id="ae-branch" placeholder="DMM/QTF/TRT" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Joining Date *</label><input id="ae-joiningDate" type="date" /></div>
+        <div class="form-group"><label>Contract Type</label>
+          <select id="ae-contractType"><option>Fixed-term</option><option>Indefinite-term</option></select></div>
+      </div>
+      <div class="upload-section"><span class="upload-section-label">📋 Contract Copy</span><div id="upload-ae-contract"></div><input type="hidden" id="ae-copyContract" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Labor Expiry</label><input id="ae-laborExpiry" type="date" /></div>
+        <div class="form-group"><label>Cost Renew Labor</label><input id="ae-costRenewLabor" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-group"><label>Contract Location</label><input id="ae-contractLocation" /></div>
+
+      <div class="section-label">Contact</div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone *</label><input id="ae-phone" type="tel" /></div>
+        <div class="form-group"><label>Email</label><input id="ae-email" type="email" /></div>
+      </div>
+
+      <div class="section-label">Health & Compliance</div>
+      <div class="form-row">
+        <div class="form-group"><label>Health Cert No.</label><input id="ae-healthCertNo" /></div>
+        <div class="form-group"><label>HC Expiry</label><input id="ae-healthCertExpiry" type="date" /></div>
+      </div>
+      <div class="upload-section"><span class="upload-section-label">🏥 Health Certificate Copy</span><div id="upload-ae-healthcert"></div><input type="hidden" id="ae-copyHealthCert" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Health Safety Expiry</label><input id="ae-healthSafetyExpiry" type="date" /></div>
+        <div class="form-group"><label>Cost Renew HC</label><input id="ae-costRenewHC" type="number" step="0.01" /></div>
+      </div>
+
+      <div class="section-label">Insurance</div>
+      <div class="form-row">
+        <div class="form-group"><label>Policy No.</label><input id="ae-insurancePolicyNo" /></div>
+        <div class="form-group"><label>Provider</label><input id="ae-insuranceProvider" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Ins. Expiry</label><input id="ae-insuranceExpiry" type="date" /></div>
+        <div class="form-group"><label>Dependants</label><input id="ae-noDependants" type="number" /></div>
+      </div>
+
+      <div class="section-label">Emergency Contact</div>
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input id="ae-emergencyContact" /></div>
+        <div class="form-group"><label>Phone</label><input id="ae-emergencyPhone" /></div>
+      </div>
+
+      <div class="section-label">Salary</div>
+      <div class="form-row">
+        <div class="form-group"><label>Basic Salary (SAR) *</label><input id="ae-basicSalary" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Other Incentives</label><input id="ae-otherInc" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Housing Allowance</label><input id="ae-housing" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Food Allowance</label><input id="ae-foodAllowance" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>GOSI Deduction</label><input id="ae-gosi" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Cost Renew ID</label><input id="ae-costRenewId" type="number" step="0.01" /></div>
+      </div>
+
+      <div class="section-label">Banking</div>
+      <div class="form-row">
+        <div class="form-group"><label>Transfer Type</label>
+          <select id="ae-transferType"><option>Payroll</option><option>Cash</option><option>Direct Transfer</option><option>International Transfer</option></select></div>
+        <div class="form-group"><label>Bank Name</label><input id="ae-bankName" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Bank Code</label><input id="ae-bankCode" /></div>
+        <div class="form-group"><label>IBAN</label><input id="ae-iban" /></div>
+      </div>
+
+      <div class="section-label">Food Allowance</div>
+      <div class="form-row">
+        <div class="form-group"><label>Eligible</label>
+          <select id="ae-foodEligible"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+        <div class="form-group"><label>FA Amount (SAR)</label><input id="ae-foodAmount" type="number" step="0.01" /></div>
+      </div>
+
+      <div class="section-label">National Address</div>
+      <div class="form-row">
+        <div class="form-group"><label>Short Address</label><input id="ae-shortAddress" style="text-transform:uppercase" /></div>
+        <div class="form-group"><label>Building No.</label><input id="ae-buildingNo" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Street</label><input id="ae-streetName" /></div>
+        <div class="form-group"><label>District</label><input id="ae-district" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input id="ae-city" /></div>
+        <div class="form-group"><label>Postal Code</label><input id="ae-postalCode" /></div>
+      </div>
+
+      <button id="ae-submit" class="btn btn-primary" onclick="submitAddEmployee()" style="margin-top:8px">✅ Add Employee</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Employee -->
+<div id="panel-edit-emp" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-edit-emp')">‹</button>
+    <span id="edit-emp-title" class="panel-title">Edit Employee</span>
+  </div>
+  <div class="panel-body">
+    <form id="edit-emp-form" onsubmit="return false">
+      <div class="section-label">Personal Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Name (EN)</label><input id="ee-nameEn" /></div>
+        <div class="form-group"><label>Name (AR)</label><input id="ee-nameAr" dir="rtl" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gender</label>
+          <select id="ee-gender"><option>Male</option><option>Female</option></select></div>
+        <div class="form-group"><label>Nationality</label><input id="ee-nationality" /></div>
+      </div>
+      <div class="form-group"><label>ID / Iqama No.</label><input id="ee-idNo" /></div>
+      <div class="upload-section"><span class="upload-section-label">📄 ID / Iqama Copy</span><div id="upload-ee-id"></div><input type="hidden" id="ee-copyId" /></div>
+      <div class="upload-section"><span class="upload-section-label">🛂 Passport Copy</span><div id="upload-ee-passport"></div><input type="hidden" id="ee-copyPassport" /></div>
+      <div class="form-group"><label>Passport No.</label><input id="ee-passportNo" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Labor Expiry</label><input id="ee-laborExpiry" type="date" /></div>
+        <div class="form-group"><label>Insurance Expiry</label><input id="ee-insuranceExpiry" type="date" /></div>
+      </div>
+
+      <div class="section-label">Employment</div>
+      <div class="form-row">
+        <div class="form-group"><label>Job Title</label><input id="ee-jobTitle" /></div>
+        <div class="form-group"><label>Branch</label><input id="ee-branch" /></div>
+      </div>
+      <div class="form-group"><label>Contract Type</label>
+        <select id="ee-contractType"><option>Fixed-term</option><option>Indefinite-term</option></select></div>
+      <div class="upload-section"><span class="upload-section-label">📋 Contract Copy</span><div id="upload-ee-contract"></div><input type="hidden" id="ee-copyContract" /></div>
+
+      <div class="section-label">Contact</div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input id="ee-phone" type="tel" /></div>
+        <div class="form-group"><label>Email</label><input id="ee-email" type="email" /></div>
+      </div>
+
+      <div class="section-label">Salary</div>
+      <div class="form-row">
+        <div class="form-group"><label>Basic Salary (SAR)</label><input id="ee-basicSalary" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Other Incentives</label><input id="ee-otherInc" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Housing Allowance</label><input id="ee-housing" type="number" step="0.01" /></div>
+        <div class="form-group"><label>GOSI Deduction</label><input id="ee-gosi" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-group"><label>Transfer Type</label>
+        <select id="ee-transferType"><option>Payroll</option><option>Cash</option><option>Direct Transfer</option><option>International Transfer</option></select></div>
+
+      <div class="section-label">Banking</div>
+      <div class="form-row">
+        <div class="form-group"><label>Bank Name</label><input id="ee-bankName" /></div>
+        <div class="form-group"><label>IBAN</label><input id="ee-iban" /></div>
+      </div>
+
+      <div class="section-label">Health Certificate</div>
+      <div class="upload-section"><span class="upload-section-label">🏥 Health Certificate</span><div id="upload-ee-healthcert"></div><input type="hidden" id="ee-copyHealthCert" /></div>
+
+      <div class="section-label">National Address</div>
+      <div class="form-row">
+        <div class="form-group"><label>Short Address</label><input id="ee-shortAddress" style="text-transform:uppercase" /></div>
+        <div class="form-group"><label>City</label><input id="ee-city" /></div>
+      </div>
+
+      <div class="section-label">Emergency Contact</div>
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input id="ee-emergencyContact" /></div>
+        <div class="form-group"><label>Phone</label><input id="ee-emergencyPhone" /></div>
+      </div>
+
+      <button id="ee-submit" class="btn btn-primary" onclick="submitEditEmployee()" style="margin-top:8px">💾 Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<!-- Hire Detail -->
 <div id="panel-hire" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-hire')">‹</button>
@@ -158,117 +409,227 @@
   <div class="panel-body" id="panel-hire-body"></div>
 </div>
 
-<!-- Add Vacation Panel -->
+<!-- Add New Hire -->
+<div id="panel-add-hire" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-add-hire')">‹</button>
+    <span class="panel-title">Add New Hire</span>
+  </div>
+  <div class="panel-body">
+    <form id="add-hire-form" onsubmit="return false">
+      <div class="form-row">
+        <div class="form-group"><label>Hire Type *</label>
+          <select id="ah-hireType" onchange="onHireTypeChange()">
+            <option value="Local Hire">🏠 Local Hire</option>
+            <option value="Foreign Hire">✈️ Foreign Hire</option>
+          </select></div>
+        <div class="form-group"><label>Nationality Type *</label>
+          <select id="ah-natType" onchange="onHireTypeChange()">
+            <option value="Saudi">Saudi</option>
+            <option value="Non-Saudi">Non-Saudi</option>
+          </select></div>
+      </div>
+
+      <div class="section-label">Personal Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Name (EN) *</label><input id="ah-nameEn" /></div>
+        <div class="form-group"><label>Name (AR)</label><input id="ah-nameAr" dir="rtl" /></div>
+      </div>
+      <div id="ah-nat-row" style="display:none">
+        <div class="form-group"><label>Nationality</label><input id="ah-nationality" /></div>
+      </div>
+      <div class="form-group"><label>ID / Passport No. *</label><input id="ah-idNo" /></div>
+      <div class="upload-section"><span class="upload-section-label">📄 ID / Passport Copy</span><div id="upload-ah-id"></div><input type="hidden" id="ah-idCopy" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Position *</label><input id="ah-position" /></div>
+        <div class="form-group"><label>Work Location</label><input id="ah-workLocation" placeholder="DMM/QTF/TRT" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone *</label><input id="ah-phone" type="tel" /></div>
+        <div class="form-group"><label>Email</label><input id="ah-email" type="email" /></div>
+      </div>
+
+      <div class="section-label">Contract & Salary</div>
+      <div class="form-group"><label>Contract Type</label>
+        <select id="ah-contractType"><option>Fixed-term</option><option>Indefinite-term</option></select></div>
+      <div class="upload-section"><span class="upload-section-label">📋 Contract Copy</span><div id="upload-ah-contract"></div><input type="hidden" id="ah-contractCopy" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Basic Salary (SAR)</label><input id="ah-basicSalary" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Other Allowance</label><input id="ah-otherAllowance" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-group"><label>Medical Insurance</label>
+        <select id="ah-medicalIns"><option>Not Included</option><option>Included</option></select></div>
+
+      <div id="ah-nonsaudi-fields" style="display:none">
+        <div class="section-label">Transfer Costs</div>
+        <div class="form-row">
+          <div class="form-group"><label>Iqama Transfer Cost</label><input id="ah-iqamaCost" type="number" step="0.01" /></div>
+          <div class="form-group"><label>Other Costs</label><input id="ah-otherCosts" type="number" step="0.01" /></div>
+        </div>
+        <div class="upload-section"><span class="upload-section-label">📝 Qiwa Contract</span><div id="upload-ah-qiwa"></div><input type="hidden" id="ah-qiwaContract" /></div>
+        <div class="upload-section"><span class="upload-section-label">📄 Iqama Transfer Doc</span><div id="upload-ah-iqama"></div><input type="hidden" id="ah-iqamaDoc" /></div>
+      </div>
+
+      <div id="ah-foreign-fields" style="display:none">
+        <div class="section-label">Importation</div>
+        <div class="upload-section"><span class="upload-section-label">🛂 Visa Copy</span><div id="upload-ah-visa"></div><input type="hidden" id="ah-visaCopy" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Visa Cost</label><input id="ah-visaCost" type="number" step="0.01" /></div>
+          <div class="form-group"><label>Chamber of Commerce Cost</label><input id="ah-chamberCost" type="number" step="0.01" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>MOF Attestation Cost</label><input id="ah-mofCost" type="number" step="0.01" /></div>
+          <div class="form-group"><label>Outsource Office</label><input id="ah-outsourceName" /></div>
+        </div>
+        <div class="upload-section"><span class="upload-section-label">📋 Outsource Authorization</span><div id="upload-ah-outsource"></div><input type="hidden" id="ah-outsourceCopy" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Auth Status</label>
+            <select id="ah-outsourceAuth"><option>Not Done</option><option>In Progress</option><option>Done</option></select></div>
+          <div class="form-group"><label>Auth Cost</label><input id="ah-outsourceAuthCost" type="number" step="0.01" /></div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:8px"><label>Notes</label><textarea id="ah-notes" rows="2"></textarea></div>
+      <button id="ah-submit" class="btn btn-primary" onclick="submitAddHire()">✅ Add New Hire</button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Leave -->
 <div id="panel-form-vac" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-form-vac')">‹</button>
     <span id="form-vac-title" class="panel-title">Add Leave</span>
   </div>
   <div class="panel-body">
-    <form id="form-vac" onsubmit="e=>e.preventDefault()">
+    <form id="form-vac" onsubmit="return false">
       <input type="hidden" id="fvac-empno" />
-      <div class="form-group">
-        <label>Leave Type *</label>
+      <div class="form-group"><label>Leave Type *</label>
         <select id="fvac-type">
-          <option>Annual Leave</option>
-          <option>Sick Leave</option>
-          <option>Emergency Leave</option>
-          <option>Wedding Leave</option>
-          <option>Funeral Leave</option>
-          <option>Unpaid Leave</option>
-        </select>
-      </div>
+          <option>Annual Leave</option><option>Sick Leave</option><option>Emergency Leave</option>
+          <option>Wedding Leave</option><option>Funeral Leave</option><option>Unpaid Leave</option>
+        </select></div>
       <div class="form-row">
         <div class="form-group"><label>Start Date *</label><input id="fvac-start" type="date" /></div>
         <div class="form-group"><label>End Date *</label><input id="fvac-end" type="date" /></div>
       </div>
-      <div class="form-group"><label>Document Link (Drive)</label><input id="fvac-doc" type="url" placeholder="https://drive.google.com/…" /></div>
+      <div class="form-group"><label>Ticket Shouldered By</label>
+        <select id="fvac-ticketBy"><option value="NA">N/A</option><option value="Brava">Brava</option><option value="Employee">Employee</option></select></div>
+      <div class="form-group"><label>Ticket Cost (SAR)</label><input id="fvac-ticketCost" type="number" step="0.01" placeholder="0.00" /></div>
+      <div class="form-group"><label>Exit Re-Entry Visa Required</label>
+        <select id="fvac-exitVisa"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+      <div class="upload-section"><span class="upload-section-label">📄 Leave Document</span><div id="upload-vac-doc"></div><input type="hidden" id="fvac-doc" /></div>
+      <div class="upload-section"><span class="upload-section-label">🛂 Exit Re-Entry Visa Doc</span><div id="upload-vac-visa"></div><input type="hidden" id="fvac-exitVisaDoc" /></div>
+      <div class="upload-section"><span class="upload-section-label">✈️ Exit Re-Entry Ticket</span><div id="upload-vac-ticket"></div><input type="hidden" id="fvac-exitVisaTicket" /></div>
       <button class="btn btn-primary" onclick="submitVacation()">✅ Save Leave</button>
     </form>
   </div>
 </div>
 
-<!-- Add Warning Panel -->
+<!-- Add Warning -->
 <div id="panel-form-warn" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-form-warn')">‹</button>
     <span id="form-warn-title" class="panel-title">Add Warning</span>
   </div>
   <div class="panel-body">
-    <form id="form-warn" onsubmit="e=>e.preventDefault()">
+    <form id="form-warn" onsubmit="return false">
       <input type="hidden" id="fwarn-empno" />
       <div class="form-group"><label>Warning Date *</label><input id="fwarn-date" type="date" /></div>
-      <div class="form-group"><label>Reason *</label><textarea id="fwarn-reason" rows="3" placeholder="Describe the reason…"></textarea></div>
-      <div class="form-group"><label>Document Link (Drive)</label><input id="fwarn-doc" type="url" placeholder="https://drive.google.com/…" /></div>
+      <div class="form-group"><label>Reason *</label><textarea id="fwarn-reason" rows="3"></textarea></div>
+      <div class="upload-section"><span class="upload-section-label">📄 Warning Letter</span><div id="upload-warn-doc"></div><input type="hidden" id="fwarn-doc" /></div>
       <button class="btn btn-primary" onclick="submitWarning()">✅ Save Warning</button>
     </form>
   </div>
 </div>
 
-<!-- Add Deduction Panel -->
+<!-- Add Deduction -->
 <div id="panel-form-ded" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-form-ded')">‹</button>
     <span id="form-ded-title" class="panel-title">Record Deduction</span>
   </div>
   <div class="panel-body">
-    <form id="form-ded" onsubmit="e=>e.preventDefault()">
+    <form id="form-ded" onsubmit="return false">
       <input type="hidden" id="fded-empno" />
       <div class="form-row">
         <div class="form-group"><label>Date *</label><input id="fded-date" type="date" /></div>
-        <div class="form-group"><label>Amount (SAR) *</label><input id="fded-amount" type="number" step="0.01" placeholder="0.00" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="fded-amount" type="number" step="0.01" /></div>
       </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="fded-cat">
-          <option>Disciplinary</option>
-          <option>Late Attendance</option>
-          <option>Uniform / Equipment</option>
-          <option>Advance Salary</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Notes</label><input id="fded-notes" placeholder="Optional…" /></div>
+      <div class="form-group"><label>Category</label>
+        <select id="fded-cat"><option>Disciplinary</option><option>Late Attendance</option><option>Uniform / Equipment</option><option>Advance Salary</option><option>Other</option></select></div>
+      <div class="form-group"><label>Notes</label><input id="fded-notes" /></div>
       <button class="btn btn-primary" onclick="submitDeduction()">✅ Save Deduction</button>
     </form>
   </div>
 </div>
 
-<!-- Salary Adjustment Panel -->
+<!-- Salary Adjustment -->
 <div id="panel-form-sal" class="panel">
   <div class="panel-header">
     <button class="panel-back" onclick="closePanel('panel-form-sal')">‹</button>
     <span id="form-sal-title" class="panel-title">Salary Adjustment</span>
   </div>
   <div class="panel-body">
-    <form id="form-sal" onsubmit="e=>e.preventDefault()">
+    <form id="form-sal" onsubmit="return false">
       <input type="hidden" id="fsal-empno" />
       <div class="form-row">
         <div class="form-group"><label>Type *</label>
-          <select id="fsal-type">
-            <option value="Increase">Increase ↑</option>
-            <option value="Decrease">Decrease ↓</option>
-          </select>
-        </div>
+          <select id="fsal-type"><option value="Increase">Increase ↑</option><option value="Decrease">Decrease ↓</option></select></div>
         <div class="form-group"><label>Field *</label>
-          <select id="fsal-field">
-            <option value="Basic Salary">Basic Salary</option>
-            <option value="Housing Allowance">Housing Allowance</option>
-            <option value="Food Allowance">Food Allowance</option>
-            <option value="Other Incentives">Other Incentives</option>
-          </select>
-        </div>
+          <select id="fsal-field"><option value="Basic Salary">Basic Salary</option><option value="Housing Allowance">Housing Allowance</option><option value="Food Allowance">Food Allowance</option><option value="Other Incentives">Other Incentives</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Date *</label><input id="fsal-date" type="date" /></div>
-        <div class="form-group"><label>Amount (SAR) *</label><input id="fsal-amount" type="number" step="0.01" placeholder="0.00" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="fsal-amount" type="number" step="0.01" /></div>
       </div>
-      <div class="form-group"><label>Notes</label><input id="fsal-notes" placeholder="Reason for adjustment…" /></div>
+      <div class="form-group"><label>Notes</label><input id="fsal-notes" /></div>
       <button class="btn btn-primary" onclick="submitSalaryAdj()">✅ Apply Adjustment</button>
     </form>
   </div>
 </div>
 
+<!-- Add Loan -->
+<div id="panel-form-loan" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-loan')">‹</button>
+    <span id="form-loan-title" class="panel-title">Add Loan</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-loan" onsubmit="return false">
+      <input type="hidden" id="floan-empno" />
+      <div class="form-row">
+        <div class="form-group"><label>Loan Date *</label><input id="floan-date" type="date" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="floan-amount" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-group"><label>Repayment Months *</label><input id="floan-months" type="number" min="1" /></div>
+      <div class="form-group"><label>Notes</label><input id="floan-notes" /></div>
+      <button class="btn btn-primary" onclick="submitLoan()">✅ Record Loan</button>
+    </form>
+  </div>
+</div>
+
+<!-- Offboarding: Set Last Day -->
+<div id="panel-form-lastday" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-lastday')">‹</button>
+    <span id="form-lastday-title" class="panel-title">Set Last Working Day</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-lastday" onsubmit="return false">
+      <input type="hidden" id="flastday-empno" />
+      <div class="form-group"><label>Last Working Date *</label><input id="flastday-date" type="date" /></div>
+      <div class="form-group"><label>Exit Reason</label>
+        <select id="flastday-reason"><option>Resigned</option><option>Terminated</option><option>Contract Expiry</option><option>Run Away</option><option>Deceased</option><option>Others</option></select></div>
+      <div class="form-group"><label>Final Exit Required</label>
+        <select id="flastday-finalexit"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+      <div class="upload-section"><span class="upload-section-label">📄 Termination / Resignation Doc</span><div id="upload-lastday-doc"></div><input type="hidden" id="flastday-doc" /></div>
+      <div class="upload-section"><span class="upload-section-label">🛂 Final Exit Visa Doc</span><div id="upload-lastday-visa"></div><input type="hidden" id="flastday-visadoc" /></div>
+      <div class="upload-section"><span class="upload-section-label">✈️ Final Exit Ticket</span><div id="upload-lastday-ticket"></div><input type="hidden" id="flastday-ticket" /></div>
+      <button class="btn btn-primary" onclick="submitLastDay()">✅ Set Last Day</button>
+    </form>
+  </div>
+</div>
 
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>

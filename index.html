@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a237e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Brava HR" />
+  <title>Brava HR</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+    <rect width="120" height="120" rx="28" fill="#ffffff20"/>
+    <text x="60" y="75" text-anchor="middle" fill="white" font-size="52" font-weight="900" font-family="serif">B</text>
+  </svg>
+  <h1>BRAVA</h1>
+  <p>HR Management System</p>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Main App -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <span id="topbar-title" class="topbar-title">Dashboard</span>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="loadDashboard()" title="Refresh">↻</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ═══ DASHBOARD PAGE ═══ -->
+    <div id="page-dashboard" class="page active">
+      <div id="dash-stats"><div class="loading"><div class="spinner"></div><p>Loading…</p></div></div>
+
+      <div class="section-label">On Vacation Now</div>
+      <div class="card" style="padding:12px">
+        <div id="dash-vac"></div>
+      </div>
+
+      <div class="section-label">Expiry Alerts (≤30 days)</div>
+      <div class="card" style="padding:12px">
+        <div id="dash-alerts"></div>
+      </div>
+    </div>
+
+    <!-- ═══ EMPLOYEES PAGE ═══ -->
+    <div id="page-employees" class="page">
+      <div class="search-wrap">
+        <input id="emp-search" type="search" placeholder="Search name or employee number…" />
+        <span class="search-icon">🔍</span>
+      </div>
+      <div id="emp-list">
+        <div class="empty"><div class="empty-icon">🔍</div><p>Search by name or employee number</p></div>
+      </div>
+    </div>
+
+    <!-- ═══ NEW HIRES PAGE ═══ -->
+    <div id="page-hires" class="page">
+      <div class="chip-row" id="hire-chips">
+        <div class="chip active" data-status="All" onclick="loadHires('All')">All</div>
+        <div class="chip" data-status="Active" onclick="loadHires('Active')">Active</div>
+        <div class="chip" data-status="Converted" onclick="loadHires('Converted')">Converted</div>
+        <div class="chip" data-status="Rejected" onclick="loadHires('Rejected')">Rejected</div>
+        <div class="chip" data-status="No Show" onclick="loadHires('No Show')">No Show</div>
+      </div>
+      <div id="hire-list"></div>
+    </div>
+
+    <!-- ═══ PAYROLL PAGE ═══ -->
+    <div id="page-payroll" class="page">
+    </div>
+
+    <!-- ═══ SETTINGS PAGE ═══ -->
+    <div id="page-settings" class="page">
+      <div class="card">
+        <div class="card-header"><span class="card-title">⚙️ API Configuration</span></div>
+        <div class="form-group">
+          <label>Google Apps Script Web App URL</label>
+          <input id="settings-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" />
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          Deploy your Apps Script as a Web App (Execute as: Me, Access: Anyone) and paste the URL above.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="testConnection()">🔌 Test</button>
+          <button class="btn btn-primary" onclick="saveSettings()">💾 Save</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">📱 Install App</span></div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">
+          On Android: tap the browser menu (⋮) → <strong>Add to Home Screen</strong><br>
+          On iOS: tap Share (⬆️) → <strong>Add to Home Screen</strong>
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">ℹ️ About</span></div>
+        <div class="settings-row"><div><div class="settings-label">Version</div><div class="settings-sub">Brava HR PWA v1.0</div></div></div>
+        <div class="settings-row"><div><div class="settings-label">Branches</div><div class="settings-sub">DMM · QTF · TRT</div></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- Bottom Navigation -->
+  <nav class="bottomnav">
+    <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+      <div class="nav-icon">📊</div>Dashboard
+    </button>
+    <button class="nav-item" id="nav-employees" onclick="navigate('employees')">
+      <div class="nav-icon">👥</div>Employees
+    </button>
+    <button class="nav-item" id="nav-hires" onclick="navigate('hires')">
+      <div class="nav-icon">📋</div>Hires
+    </button>
+    <button class="nav-item" id="nav-payroll" onclick="navigate('payroll')">
+      <div class="nav-icon">💳</div>Payroll
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="navigate('settings')">
+      <div class="nav-icon">⚙️</div>Settings
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+
+<!-- ═══ SLIDE PANELS ═══ -->
+
+<!-- Employee Detail Panel -->
+<div id="panel-emp" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-emp')">‹</button>
+    <span id="panel-emp-title" class="panel-title">Employee</span>
+  </div>
+  <div class="panel-body" id="panel-emp-body"></div>
+</div>
+
+<!-- Hire Detail Panel -->
+<div id="panel-hire" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-hire')">‹</button>
+    <span id="panel-hire-title" class="panel-title">New Hire</span>
+  </div>
+  <div class="panel-body" id="panel-hire-body"></div>
+</div>
+
+<!-- Add Vacation Panel -->
+<div id="panel-form-vac" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-vac')">‹</button>
+    <span id="form-vac-title" class="panel-title">Add Leave</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-vac" onsubmit="e=>e.preventDefault()">
+      <input type="hidden" id="fvac-empno" />
+      <div class="form-group">
+        <label>Leave Type *</label>
+        <select id="fvac-type">
+          <option>Annual Leave</option>
+          <option>Sick Leave</option>
+          <option>Emergency Leave</option>
+          <option>Wedding Leave</option>
+          <option>Funeral Leave</option>
+          <option>Unpaid Leave</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Start Date *</label><input id="fvac-start" type="date" /></div>
+        <div class="form-group"><label>End Date *</label><input id="fvac-end" type="date" /></div>
+      </div>
+      <div class="form-group"><label>Document Link (Drive)</label><input id="fvac-doc" type="url" placeholder="https://drive.google.com/…" /></div>
+      <button class="btn btn-primary" onclick="submitVacation()">✅ Save Leave</button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Warning Panel -->
+<div id="panel-form-warn" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-warn')">‹</button>
+    <span id="form-warn-title" class="panel-title">Add Warning</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-warn" onsubmit="e=>e.preventDefault()">
+      <input type="hidden" id="fwarn-empno" />
+      <div class="form-group"><label>Warning Date *</label><input id="fwarn-date" type="date" /></div>
+      <div class="form-group"><label>Reason *</label><textarea id="fwarn-reason" rows="3" placeholder="Describe the reason…"></textarea></div>
+      <div class="form-group"><label>Document Link (Drive)</label><input id="fwarn-doc" type="url" placeholder="https://drive.google.com/…" /></div>
+      <button class="btn btn-primary" onclick="submitWarning()">✅ Save Warning</button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Deduction Panel -->
+<div id="panel-form-ded" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-ded')">‹</button>
+    <span id="form-ded-title" class="panel-title">Record Deduction</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-ded" onsubmit="e=>e.preventDefault()">
+      <input type="hidden" id="fded-empno" />
+      <div class="form-row">
+        <div class="form-group"><label>Date *</label><input id="fded-date" type="date" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="fded-amount" type="number" step="0.01" placeholder="0.00" /></div>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="fded-cat">
+          <option>Disciplinary</option>
+          <option>Late Attendance</option>
+          <option>Uniform / Equipment</option>
+          <option>Advance Salary</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><input id="fded-notes" placeholder="Optional…" /></div>
+      <button class="btn btn-primary" onclick="submitDeduction()">✅ Save Deduction</button>
+    </form>
+  </div>
+</div>
+
+<!-- Salary Adjustment Panel -->
+<div id="panel-form-sal" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-sal')">‹</button>
+    <span id="form-sal-title" class="panel-title">Salary Adjustment</span>
+  </div>
+  <div class="panel-body">
+    <form id="form-sal" onsubmit="e=>e.preventDefault()">
+      <input type="hidden" id="fsal-empno" />
+      <div class="form-row">
+        <div class="form-group"><label>Type *</label>
+          <select id="fsal-type">
+            <option value="Increase">Increase ↑</option>
+            <option value="Decrease">Decrease ↓</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Field *</label>
+          <select id="fsal-field">
+            <option value="Basic Salary">Basic Salary</option>
+            <option value="Housing Allowance">Housing Allowance</option>
+            <option value="Food Allowance">Food Allowance</option>
+            <option value="Other Incentives">Other Incentives</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date *</label><input id="fsal-date" type="date" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="fsal-amount" type="number" step="0.01" placeholder="0.00" /></div>
+      </div>
+      <div class="form-group"><label>Notes</label><input id="fsal-notes" placeholder="Reason for adjustment…" /></div>
+      <button class="btn btn-primary" onclick="submitSalaryAdj()">✅ Apply Adjustment</button>
+    </form>
+  </div>
+</div>
+
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -44,3 +44,34 @@ const API = {
   async generatePayroll(month, year)       { return this.call('generatePayroll', { month, year }); },
   async generateFoodAllowance(month, year) { return this.call('generateFoodAllowance', { month, year }); },
 };
+
+// ── File Upload ───────────────────────────────────────────────
+API.uploadFile = async function(file, subFolder) {
+  const url = localStorage.getItem('brava_api_url');
+  if (!url) throw new Error('API not configured.');
+
+  // Convert file to base64
+  const base64Data = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const payload = {
+    action:    'uploadFile',
+    fileName:  file.name,
+    mimeType:  file.type || 'application/octet-stream',
+    base64Data,
+    folderName:'Brava HR Documents',
+    subFolder: subFolder || '',
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data; // { ok, fileId, viewUrl, directUrl, fileName, size }
+};

@@ -203,3 +203,53 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 #splash img { height:80px; margin-bottom:20px; }
 #splash h1 { color:#fff; font-size:28px; font-weight:700; letter-spacing:1px; }
 #splash p { color:#90caf9; font-size:14px; margin-top:8px; }
+
+/* ── File Upload Widget ──────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: .2s;
+  background: var(--bg);
+  margin-bottom: 8px;
+}
+.upload-zone:hover, .upload-zone:active { border-color: var(--navy); background: var(--cyan-lt); }
+.upload-zone.uploading { border-color: var(--cyan); background: var(--cyan-lt); cursor: wait; }
+.upload-zone.done { border-color: var(--green); background: var(--green-lt); cursor: pointer; }
+.upload-icon { font-size: 28px; margin-bottom: 6px; }
+.upload-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.upload-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+.upload-progress { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+.upload-progress-bar { height: 100%; background: var(--navy); border-radius: 2px; width: 0; transition: width .2s; }
+
+.upload-result { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.upload-link { font-size: 12px; font-weight: 600; color: var(--navy); text-decoration: none; background: var(--cyan-lt); padding: 6px 12px; border-radius: var(--radius-sm); flex: 1; text-align: center; }
+.upload-change { font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; cursor: pointer; }
+
+.upload-section { margin-bottom: 14px; }
+.upload-section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; display: block; }
+
+/* ── PIN Lock Screen ─────────────────────────────────────── */
+#lockscreen {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.lock-card { text-align: center; padding: 32px 24px; width: 100%; max-width: 340px; }
+.lock-logo { margin-bottom: 16px; }
+.lock-title { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: 2px; }
+.lock-sub { color: #90caf9; font-size: 13px; margin: 8px 0 24px; }
+.pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 8px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); transition: .15s; }
+.pin-dot.filled { background: #fff; border-color: #fff; }
+.pin-error { color: #ef9a9a; font-size: 13px; min-height: 20px; margin-bottom: 16px; }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 280px; margin: 0 auto 20px; }
+.pin-btn { background: rgba(255,255,255,.1); border: none; color: #fff; font-size: 22px; font-weight: 600; border-radius: 50%; width: 72px; height: 72px; cursor: pointer; transition: .15s; font-family: inherit; }
+.pin-btn:active { background: rgba(255,255,255,.3); transform: scale(.93); }
+.pin-btn-clear { font-size: 18px; }
+.pin-btn-ok { background: rgba(255,255,255,.2); }
+.pin-hint { color: rgba(255,255,255,.4); font-size: 11px; }

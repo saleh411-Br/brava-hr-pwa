@@ -75,3 +75,11 @@ API.uploadFile = async function(file, subFolder) {
   if (data.error) throw new Error(data.error);
   return data; // { ok, fileId, viewUrl, directUrl, fileName, size }
 };
+
+// Additional API methods
+API.getAllEmployees    = async function()      { return this.call('getAllEmployees'); };
+API.getEmployeeRecords= async function(empNo) { return this.call('getEmployeeRecords', { empNo }); };
+API.addAbsence        = async function(d)     { return this.call('addAbsence', d); };
+API.addHolidayRep     = async function(d)     { return this.call('addHolidayReplacement', d); };
+API.addLoanDeduction  = async function(d)     { return this.call('addLoanDeduction', d); };
+API.deleteRecord      = async function(type, row) { return this.call('deleteRecord', { type, row }); };

@@ -17,7 +17,8 @@
 <div id="lockscreen">
   <div class="lock-card">
     <div class="lock-logo">
-      <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1a237e"/><text x="32" y="46" text-anchor="middle" fill="white" font-size="36" font-weight="900" font-family="serif">B</text></svg>
+      <img src="icons/logo.png" alt="Brava HR" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+      <svg style="display:none" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" rx="20" fill="rgba(255,255,255,.15)"/><text x="40" y="56" text-anchor="middle" fill="white" font-size="48" font-weight="900" font-family="serif">B</text></svg>
     </div>
     <h2 class="lock-title">BRAVA HR</h2>
     <p class="lock-sub">Enter your PIN to continue</p>
@@ -82,12 +83,12 @@
 
     <!-- ═══ EMPLOYEES ═══ -->
     <div id="page-employees" class="page">
-      <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:stretch">
         <div class="search-wrap" style="flex:1;margin-bottom:0">
           <input id="emp-search" type="search" placeholder="Search name or employee number…" />
           <span class="search-icon">🔍</span>
         </div>
-        <button class="btn btn-primary" style="white-space:nowrap;padding:12px 14px" onclick="openAddEmployee()">＋ Add</button>
+        <button class="btn btn-primary" style="white-space:nowrap;padding:0 16px;height:46px" onclick="openAddEmployee()">＋ Add</button>
       </div>
       <div id="emp-list">
         <div class="empty"><div class="empty-icon">🔍</div><p>Search by name or employee number</p></div>

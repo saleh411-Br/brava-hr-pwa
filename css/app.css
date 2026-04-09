@@ -276,3 +276,7 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 
 /* ── Hijri toggle ────────────────────────────────────────── */
 .hijri-toggle { font-size:11px; color:var(--navy); cursor:pointer; margin-top:3px; display:inline-block; }
+
+/* ── Record edit button ──────────────────────────────────── */
+.rec-edit { background:var(--cyan-lt); color:var(--navy); border:1px solid var(--navy); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; flex-shrink:0; }
+.rec-edit:hover { background:var(--navy); color:#fff; }

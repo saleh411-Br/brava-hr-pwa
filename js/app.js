@@ -282,21 +282,31 @@ function renderEmployeeDetail(e){
 }
 
 // ── EMPLOYEE RECORDS ───────────────────────────────────────
+// ── Store current empNo for records refresh ──
+let _currentRecordsEmpNo = '';
+
 async function loadEmpRecords(empNo){
+  _currentRecordsEmpNo = empNo;
   const panel=document.getElementById('emp-records-panel');
   panel.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
     const r=await API.getEmployeeRecords(empNo);
     let html='';
 
+    // Helper: doc link button
+    function docBtn(url){ return url&&url.indexOf('http')===0?`<a href="${url}" target="_blank" style="font-size:11px;padding:3px 8px;background:var(--cyan-lt);color:var(--navy);border-radius:4px;text-decoration:none;white-space:nowrap">🔗 Doc</a>`:''; }
+
     // Vacations
     if(r.vacations&&r.vacations.length){
       html+=`<div class="detail-section-title">🏖️ Vacations</div>`;
       r.vacations.forEach(v=>{
         html+=`<div class="rec-row">
-          <div style="flex:1;min-width:0"><strong>${v.type}</strong><br><span style="font-size:11px;color:var(--muted)">${v.start} → ${v.end} · ${v.days} days</span></div>
-          <div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="rec-edit" onclick="editRecord('vacation',${v._row},'${empNo}',${JSON.stringify(v).replace(/'/g,"&#39;")})">✏️</button>
+          <div style="flex:1;min-width:0">
+            <strong>${v.type}</strong> ${docBtn(v.doc)}<br>
+            <span style="font-size:11px;color:var(--muted)">${v.start} → ${v.end} · ${v.days} days</span>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+            <button class="rec-edit" onclick="openEditVacation(${v._row},'${empNo}','${(v.type||'').replace(/'/g,'_')}','${v.start}','${v.end}')">✏️</button>
             <button class="rec-del" onclick="deleteRecord('vacation',${v._row},'${empNo}')">🗑️</button>
           </div></div>`;
       });
@@ -307,8 +317,11 @@ async function loadEmpRecords(empNo){
       html+=`<div class="detail-section-title" style="margin-top:12px">⚠️ Warnings</div>`;
       r.warnings.forEach(w=>{
         html+=`<div class="rec-row">
-          <div style="flex:1;min-width:0"><strong>${w.date}</strong><br><span style="font-size:11px;color:var(--muted)">${w.reason}</span></div>
-          <div style="display:flex;gap:4px;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <strong>${w.date}</strong> ${docBtn(w.doc)}<br>
+            <span style="font-size:11px;color:var(--muted)">${w.reason}</span>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
             <button class="rec-del" onclick="deleteRecord('warning',${w._row},'${empNo}')">🗑️</button>
           </div></div>`;
       });
@@ -319,8 +332,11 @@ async function loadEmpRecords(empNo){
       html+=`<div class="detail-section-title" style="margin-top:12px">🏦 Loans</div>`;
       r.loans.forEach(l=>{
         html+=`<div class="rec-row">
-          <div style="flex:1;min-width:0"><strong>${l.loanId}</strong> · SAR ${parseFloat(l.amount).toLocaleString()}<br><span style="font-size:11px;color:var(--muted)">${l.months} months · <span style="color:${l.status==='Active'?'var(--amber)':'var(--green)'}">${l.status}</span></span></div>
-          <div style="display:flex;gap:4px;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <strong>${l.loanId}</strong> · SAR ${parseFloat(l.amount).toLocaleString()}<br>
+            <span style="font-size:11px;color:var(--muted)">${l.months} months · <span style="color:${l.status==='Active'?'var(--amber)':'var(--green)'}">${l.status}</span> · ${l.date}</span>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
             <button class="rec-del" onclick="deleteRecord('loan',${l._row},'${empNo}')">🗑️</button>
           </div></div>`;
       });
@@ -331,9 +347,12 @@ async function loadEmpRecords(empNo){
       html+=`<div class="detail-section-title" style="margin-top:12px">🚫 Absences</div>`;
       r.absences.forEach(a=>{
         html+=`<div class="rec-row">
-          <div style="flex:1;min-width:0"><strong>${a.start} → ${a.end}</strong> · ${a.days} days<br><span style="font-size:11px;color:var(--muted)">${a.reason}</span></div>
-          <div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="rec-edit" onclick="editAbsenceRecord(${a._row},'${empNo}','${a.start}','${a.end}','${a.reason}')">✏️</button>
+          <div style="flex:1;min-width:0">
+            <strong>${a.start} → ${a.end}</strong> · ${a.days} days<br>
+            <span style="font-size:11px;color:var(--muted)">${a.reason}</span>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+            <button class="rec-edit" onclick="openEditAbsence(${a._row},'${empNo}','${a.start}','${a.end}','${(a.reason||'').replace(/'/g,'_')}')">✏️</button>
             <button class="rec-del" onclick="deleteRecord('absence',${a._row},'${empNo}')">🗑️</button>
           </div></div>`;
       });
@@ -343,24 +362,26 @@ async function loadEmpRecords(empNo){
   }catch(e){panel.innerHTML=`<p style="color:red">${e.message}</p>`;}
 }
 
-// Edit vacation record
-function editRecord(type, row, empNo, data) {
-  if(type==='vacation') {
-    document.getElementById('fvac-empno').value = empNo;
-    document.getElementById('form-vac-title').textContent = 'Edit Leave Record';
-    // Pre-fill
-    document.getElementById('fvac-type').value = data.type || 'Annual Leave';
-    openPanel('panel-form-vac');
-  }
+// Open edit vacation panel pre-filled
+function openEditVacation(row, empNo, type, start, end){
+  document.getElementById('fvac-empno').value = empNo;
+  document.getElementById('form-vac-title').textContent = 'Edit Leave Record';
+  try{ document.getElementById('fvac-type').value = type; }catch(e){}
+  // Convert D-MMM-YY to YYYY-MM-DD for date input
+  function parseDate(d){ try{ return new Date(d).toISOString().split('T')[0]; }catch(e){ return ''; } }
+  document.getElementById('fvac-start').value = parseDate(start);
+  document.getElementById('fvac-end').value   = parseDate(end);
+  openPanel('panel-form-vac');
 }
 
-// Edit absence record
-function editAbsenceRecord(row, empNo, start, end, reason) {
+// Open edit absence panel pre-filled
+function openEditAbsence(row, empNo, start, end, reason){
   document.getElementById('fabs-empno').value = empNo;
   document.getElementById('form-abs-title').textContent = 'Edit Absence';
-  document.getElementById('fabs-start').value = start;
-  document.getElementById('fabs-end').value = end;
-  document.getElementById('fabs-reason').value = reason;
+  function parseDate(d){ try{ return new Date(d).toISOString().split('T')[0]; }catch(e){ return ''; } }
+  document.getElementById('fabs-start').value  = parseDate(start);
+  document.getElementById('fabs-end').value    = parseDate(end);
+  document.getElementById('fabs-reason').value = reason.replace(/_/g,"'");
   openPanel('panel-form-abs');
 }
 
@@ -467,8 +488,47 @@ async function submitAbsence(){const g=id=>document.getElementById(id)?.value?.t
 function openAddHolidayRep(empNo,name){document.getElementById('form-holrep').reset();document.getElementById('fholrep-empno').value=empNo;document.getElementById('form-holrep-title').textContent=`Holiday Replacement — ${name}`;openPanel('panel-form-holrep');}
 async function submitHolidayRep(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fholrep-empno'),holType:g('fholrep-type'),scenario:g('fholrep-scenario'),holStart:g('fholrep-start'),holEnd:g('fholrep-end')};if(!d.holStart||!d.holEnd){toast('Fill dates','err');return;}try{const r=await API.addHolidayRep(d);toast(r.msg||'Recorded','ok');closePanel('panel-form-holrep');}catch(e){toast(e.message,'err');}}
 
-function openRecLoanDed(empNo,name){document.getElementById('form-loanded').reset();document.getElementById('floanded-empno').value=empNo;document.getElementById('form-loanded-title').textContent=`Loan Deduction — ${name}`;openPanel('panel-form-loanded');}
-async function submitLoanDed(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('floanded-empno'),loanId:g('floanded-loanid'),actualAmount:g('floanded-amount'),dedDate:g('floanded-date')};if(!d.loanId||!d.actualAmount){toast('Fill all fields','err');return;}try{const r=await API.addLoanDeduction(d);toast(r.msg||'Deduction recorded','ok');closePanel('panel-form-loanded');}catch(e){toast(e.message,'err');}}
+async function openRecLoanDed(empNo,name){
+  document.getElementById('form-loanded').reset();
+  document.getElementById('floanded-empno').value=empNo;
+  document.getElementById('floanded-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('form-loanded-title').textContent=`Loan Deduction — ${name}`;
+  // Load employee's active loans
+  const sel=document.getElementById('floanded-loanselect');
+  sel.innerHTML='<option value="">Loading loans…</option>';
+  document.getElementById('floanded-amount').value='';
+  document.getElementById('floanded-nextmonth').textContent='';
+  try{
+    const loans=await API.getEmployeeLoans(empNo);
+    if(!loans.length){
+      sel.innerHTML='<option value="">No active loans found</option>';
+    } else {
+      sel.innerHTML='<option value="">— Select Loan —</option>'+
+        loans.map(l=>`<option value="${l.loanId}" data-amount="${l.nextAmount}" data-month="${l.nextMonth}">
+          ${l.loanId} · SAR ${parseFloat(l.amount).toLocaleString()} · ${l.pendingCount} payments left
+        </option>`).join('');
+    }
+  }catch(e){sel.innerHTML='<option value="">Error loading loans</option>';}
+  openPanel('panel-form-loanded');
+}
+function onLoanSelect(){
+  const sel=document.getElementById('floanded-loanselect');
+  const opt=sel.options[sel.selectedIndex];
+  const amt=opt?.dataset?.amount;
+  const month=opt?.dataset?.month;
+  if(amt) document.getElementById('floanded-amount').value=amt;
+  if(month) document.getElementById('floanded-nextmonth').textContent=`Next deduction: ${month}`;
+  else document.getElementById('floanded-nextmonth').textContent='';
+  document.getElementById('floanded-loanid').value=sel.value;
+}
+async function submitLoanDed(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const d={empNo:g('floanded-empno'),loanId:g('floanded-loanid'),actualAmount:g('floanded-amount'),dedDate:g('floanded-date')};
+  if(!d.loanId){toast('Select a loan','err');return;}
+  if(!d.actualAmount||parseFloat(d.actualAmount)<=0){toast('Enter amount','err');return;}
+  try{const r=await API.addLoanDeduction(d);toast(r.msg||'Deduction recorded','ok');closePanel('panel-form-loanded');}
+  catch(e){toast(e.message,'err');}
+}
 
 function openSetLastDay(empNo,name){document.getElementById('form-lastday').reset();document.getElementById('flastday-empno').value=empNo;document.getElementById('form-lastday-title').textContent=`Last Day — ${name}`;openPanel('panel-form-lastday');setTimeout(()=>initUploads([['upload-lastday-doc',`Employees/${name}/Offboarding`,'flastday-doc'],['upload-lastday-visa',`Employees/${name}/Final Exit`,'flastday-visadoc'],['upload-lastday-ticket',`Employees/${name}/Tickets`,'flastday-ticket']]),100);}
 async function submitLastDay(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('flastday-empno'),lastWorkingDate:g('flastday-date'),exitReason:g('flastday-reason'),finalExitRequired:g('flastday-finalexit'),terminationDoc:g('flastday-doc'),finalExitVisaDoc:g('flastday-visadoc'),finalExitTicket:g('flastday-ticket')};if(!d.lastWorkingDate){toast('Date required','err');return;}try{const r=await API.call('setLastDay',d);toast(r.msg||'Last day set','ok');closePanel('panel-form-lastday');}catch(e){toast(e.message,'err');}}

@@ -267,3 +267,12 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 
 /* ── Lock screen logo ────────────────────────────────── */
 .lock-logo img { height:80px; width:auto; }
+
+/* ── Record rows with delete button ─────────────────────── */
+.rec-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.rec-row:last-child { border-bottom:none; }
+.rec-del { background:var(--red-lt); color:var(--red); border:1px solid var(--red); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; flex-shrink:0; margin-left:8px; }
+.rec-del:hover { background:var(--red); color:#fff; }
+
+/* ── Hijri toggle ────────────────────────────────────────── */
+.hijri-toggle { font-size:11px; color:var(--navy); cursor:pointer; margin-top:3px; display:inline-block; }

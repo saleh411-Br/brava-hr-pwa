@@ -131,58 +131,144 @@ function renderEmployeeDetail(e){
   function days(d,n){const v=parseInt(n);const cls=isNaN(v)?'':v<0?'days-crit':v<=30?'days-warn':'days-ok';const lbl=isNaN(v)?'—':v<0?`${Math.abs(v)}d EXPIRED`:`${v}d`;return `<p>${d||'—'} <span class="days-pill ${cls}">${lbl}</span></p>`;}
   function val(v){return v||'—';}
   function sar(v){return v?`SAR ${parseFloat(v).toLocaleString()}`:'—';}
+  // Document row — shows View button or "Not uploaded"
+  function doc(label,url){
+    const link = url && url.indexOf('http')===0
+      ? `<a href="${url}" target="_blank" class="doc-view-btn">🔗 View</a>`
+      : `<span class="doc-missing">Not uploaded</span>`;
+    return `<div class="doc-row"><span class="doc-row-label">${label}</span>${link}</div>`;
+  }
+  const nm = (e.nameEn||'').replace(/'/g,'_');
   document.getElementById('panel-emp-body').innerHTML=`
-    <div class="detail-section"><div class="detail-section-title">Personal</div><div class="detail-grid">
-      <div class="detail-item"><label>Emp No.</label><p>${val(e.empNo)}</p></div>
+
+    <!-- PERSONAL -->
+    <div class="detail-section"><div class="detail-section-title">👤 Personal Information</div><div class="detail-grid">
+      <div class="detail-item"><label>Emp No.</label><p style="font-family:monospace;font-weight:700">${val(e.empNo)}</p></div>
       <div class="detail-item"><label>Status</label><p><span class="emp-badge b-${(e.status||'Active').replace(/\s/g,'')}">${val(e.status)}</span></p></div>
       <div class="detail-item"><label>Name (EN)</label><p>${val(e.nameEn)}</p></div>
+      <div class="detail-item"><label>Name (AR)</label><p dir="rtl">${val(e.nameAr)}</p></div>
       <div class="detail-item"><label>Nationality</label><p>${val(e.nationality)}</p></div>
-      <div class="detail-item"><label>ID No.</label><p>${val(e.idNo)}</p></div>
-      <div class="detail-item"><label>ID Expiry</label>${days(e.idExpiry,e.idDays)}</div>
-      <div class="detail-item"><label>Pass No.</label><p>${val(e.passportNo)}</p></div>
-      <div class="detail-item"><label>Pass Expiry</label>${days(e.passExpiry,e.passDays)}</div>
-      <div class="detail-item"><label>Phone</label><p><a href="tel:${e.phone}" style="color:var(--navy)">${val(e.phone)}</a></p></div>
-      <div class="detail-item"><label>Email</label><p>${val(e.email)}</p></div>
+      <div class="detail-item"><label>Date of Birth</label><p>${val(e.dob)}</p></div>
+      <div class="detail-item"><label>Gender</label><p>${val(e.gender)}</p></div>
+      <div class="detail-item"><label>Home Airport</label><p>${val(e.homeAirport)}</p></div>
+      <div class="detail-item"><label>Phone</label><p><a href="tel:${e.phone}" style="color:var(--navy);font-weight:600">${val(e.phone)}</a></p></div>
+      <div class="detail-item"><label>Email</label><p style="font-size:12px">${val(e.email)}</p></div>
     </div></div>
-    <div class="detail-section"><div class="detail-section-title">Employment</div><div class="detail-grid">
+
+    <!-- ID DOCUMENTS -->
+    <div class="detail-section"><div class="detail-section-title">📄 ID & Documents</div><div class="detail-grid">
+      <div class="detail-item"><label>ID / Iqama No.</label><p style="font-weight:600">${val(e.idNo)}</p></div>
+      <div class="detail-item"><label>ID Expiry</label>${days(e.idExpiry,e.idDays)}</div>
+      <div class="detail-item"><label>Passport No.</label><p style="font-weight:600">${val(e.passportNo)}</p></div>
+      <div class="detail-item"><label>Pass Expiry</label>${days(e.passExpiry,e.passDays)}</div>
+      <div class="detail-item"><label>Border No.</label><p>${val(e.borderNo)}</p></div>
+      <div class="detail-item"><label>Country Entry</label><p>${val(e.countryEntry)}</p></div>
+    </div>
+    <div style="margin-top:8px">
+      ${doc('ID / Iqama Copy', e.copyId)}
+      ${doc('Passport Copy', e.copyPassport)}
+    </div></div>
+
+    <!-- EMPLOYMENT -->
+    <div class="detail-section"><div class="detail-section-title">💼 Employment</div><div class="detail-grid">
       <div class="detail-item"><label>Job Title</label><p>${val(e.jobTitle)}</p></div>
       <div class="detail-item"><label>Branch</label><p>${val(e.branch)}</p></div>
       <div class="detail-item"><label>Joining Date</label><p>${val(e.joiningDate)}</p></div>
-      <div class="detail-item"><label>Service</label><p>${val(e.serviceLength)}</p></div>
-      <div class="detail-item"><label>Contract</label><p>${val(e.contractType)}</p></div>
-      <div class="detail-item"><label>Contract Exp</label>${days(e.contractExpiry,e.contractDays)}</div>
-      <div class="detail-item"><label>Labor Exp</label>${days(e.laborExpiry,e.laborDays)}</div>
-      <div class="detail-item"><label>Insurance Exp</label>${days(e.insuranceExpiry,e.insuranceDays)}</div>
-      <div class="detail-item"><label>Health Cert</label>${days(e.healthCertExpiry,e.healthCertDays)}</div>
+      <div class="detail-item"><label>Service Length</label><p style="font-weight:600;color:var(--navy)">${val(e.serviceLength)}</p></div>
+      <div class="detail-item"><label>Contract Type</label><p>${val(e.contractType)}</p></div>
+      <div class="detail-item"><label>Contract No.</label><p>${val(e.contractNo)}</p></div>
+      <div class="detail-item"><label>Contract Location</label><p>${val(e.contractLocation)}</p></div>
+      <div class="detail-item"><label>Contract Expiry</label>${days(e.contractExpiry,e.contractDays)}</div>
+    </div>
+    <div style="margin-top:8px">
+      ${doc('Contract Copy', e.copyContract)}
     </div></div>
-    <div class="detail-section"><div class="detail-section-title">Salary</div><div class="detail-grid">
-      <div class="detail-item"><label>Basic</label><p>${sar(e.basicSalary)}</p></div>
-      <div class="detail-item"><label>Housing</label><p>${sar(e.housingAllowance)}</p></div>
-      <div class="detail-item"><label>Other Inc.</label><p>${sar(e.otherIncentives)}</p></div>
-      <div class="detail-item"><label>GOSI</label><p>${sar(e.gosiDeduction)}</p></div>
-      <div class="detail-item"><label>Net Pay</label><p style="font-weight:700;color:var(--navy)">${sar(e.netPayment)}</p></div>
-      <div class="detail-item"><label>Transfer</label><p>${val(e.salaryTransferType)}</p></div>
-      <div class="detail-item"><label>Bank</label><p>${val(e.bankName)}</p></div>
-      <div class="detail-item"><label>IBAN</label><p style="font-size:11px">${val(e.iban)}</p></div>
+
+    <!-- LABOR & COMPLIANCE -->
+    <div class="detail-section"><div class="detail-section-title">🏛️ Labor & Compliance</div><div class="detail-grid">
+      <div class="detail-item"><label>Labor Expiry</label>${days(e.laborExpiry,e.laborDays)}</div>
+      <div class="detail-item"><label>Cost Renew Labor</label><p>${sar(e.costRenewLabor)}</p></div>
     </div></div>
-    <div class="detail-section"><div class="detail-section-title">Leave & Loans</div><div class="detail-grid">
+
+    <!-- HEALTH CERTIFICATE -->
+    <div class="detail-section"><div class="detail-section-title">🏥 Health Certificate</div><div class="detail-grid">
+      <div class="detail-item"><label>Cert No.</label><p>${val(e.healthCertNo)}</p></div>
+      <div class="detail-item"><label>Cert Expiry</label>${days(e.healthCertExpiry,e.healthCertDays)}</div>
+      <div class="detail-item"><label>Health Safety Expiry</label>${days(e.healthSafetyExpiry,e.healthSafetyDays)}</div>
+      <div class="detail-item"><label>Cost Renew HC</label><p>${sar(e.costRenewHealthCert)}</p></div>
+    </div>
+    <div style="margin-top:8px">
+      ${doc('Health Certificate Copy', e.copyHealthCert)}
+    </div></div>
+
+    <!-- INSURANCE -->
+    <div class="detail-section"><div class="detail-section-title">🛡️ Insurance</div><div class="detail-grid">
+      <div class="detail-item"><label>Policy No.</label><p>${val(e.insurancePolicyNo)}</p></div>
+      <div class="detail-item"><label>Provider</label><p>${val(e.insuranceProvider)}</p></div>
+      <div class="detail-item"><label>Expiry</label>${days(e.insuranceExpiry,e.insuranceDays)}</div>
+      <div class="detail-item"><label>Dependants</label><p>${val(e.noDependants)}</p></div>
+      <div class="detail-item"><label>Ins. Branch</label><p>${val(e.insuranceBranch)}</p></div>
+    </div></div>
+
+    <!-- SALARY -->
+    <div class="detail-section"><div class="detail-section-title">💰 Salary & Banking</div><div class="detail-grid">
+      <div class="detail-item"><label>Basic Salary</label><p style="font-weight:700">${sar(e.basicSalary)}</p></div>
+      <div class="detail-item"><label>Housing Allow.</label><p>${sar(e.housingAllowance)}</p></div>
+      <div class="detail-item"><label>Other Incentives</label><p>${sar(e.otherIncentives)}</p></div>
+      <div class="detail-item"><label>Food Allowance</label><p>${sar(e.foodAllowance)}</p></div>
+      <div class="detail-item"><label>Total Payment</label><p>${sar(e.totalPayment)}</p></div>
+      <div class="detail-item"><label>GOSI Deduction</label><p style="color:var(--red)">${sar(e.gosiDeduction)}</p></div>
+      <div class="detail-item"><label>Net Pay</label><p style="font-weight:700;color:var(--navy);font-size:15px">${sar(e.netPayment)}</p></div>
+      <div class="detail-item"><label>Transfer Type</label><p>${val(e.salaryTransferType)}</p></div>
+      <div class="detail-item"><label>Bank Name</label><p>${val(e.bankName)}</p></div>
+      <div class="detail-item full"><label>IBAN</label><p style="font-family:monospace;font-size:12px">${val(e.iban)}</p></div>
+    </div></div>
+
+    <!-- LEAVE & LOANS -->
+    <div class="detail-section"><div class="detail-section-title">🏖️ Leave & Loans</div><div class="detail-grid">
       <div class="detail-item"><label>Vac Accrued</label><p>${val(e.vacAccrued)} days</p></div>
+      <div class="detail-item"><label>Vac Taken</label><p>${val(e.vacTaken)} days</p></div>
       <div class="detail-item"><label>Vac Remaining</label><p style="font-weight:700;color:var(--navy)">${val(e.vacRemaining)} days</p></div>
-      <div class="detail-item"><label>Loan Balance</label><p style="color:${parseFloat(e.loanBalance)>0?'var(--red)':'inherit'}">${sar(e.loanBalance)}</p></div>
+      <div class="detail-item"><label>Last Vac Date</label><p>${val(e.lastVacDate)}</p></div>
+      <div class="detail-item"><label>Loan Balance</label><p style="color:${parseFloat(e.loanBalance)>0?'var(--red)':'var(--green)'}; font-weight:600">${sar(e.loanBalance)}</p></div>
       <div class="detail-item"><label>EOS Accrual</label><p style="font-weight:700">${sar(e.eosAccrual)}</p></div>
     </div></div>
-    ${e.city||e.shortAddress?`<div class="detail-section"><div class="detail-section-title">National Address</div><div class="detail-grid">
-      ${e.shortAddress?`<div class="detail-item"><label>Short Address</label><p style="font-family:monospace;font-weight:600;letter-spacing:1px">${e.shortAddress}</p></div>`:''}
+
+    <!-- EMERGENCY CONTACT -->
+    <div class="detail-section"><div class="detail-section-title">🆘 Emergency Contact</div><div class="detail-grid">
+      <div class="detail-item"><label>Name</label><p>${val(e.emergencyContact)}</p></div>
+      <div class="detail-item"><label>Phone</label><p><a href="tel:${e.emergencyPhone}" style="color:var(--navy)">${val(e.emergencyPhone)}</a></p></div>
+    </div></div>
+
+    <!-- NATIONAL ADDRESS -->
+    ${e.city||e.shortAddress||e.streetName?`<div class="detail-section"><div class="detail-section-title">📍 National Address</div><div class="detail-grid">
+      ${e.shortAddress?`<div class="detail-item"><label>Short Address</label><p style="font-family:monospace;font-weight:700;letter-spacing:2px">${e.shortAddress}</p></div>`:''}
+      ${e.buildingNo?`<div class="detail-item"><label>Building No.</label><p>${e.buildingNo}</p></div>`:''}
+      ${e.streetName?`<div class="detail-item"><label>Street</label><p>${e.streetName}</p></div>`:''}
+      ${e.district?`<div class="detail-item"><label>District</label><p>${e.district}</p></div>`:''}
       ${e.city?`<div class="detail-item"><label>City</label><p>${e.city}</p></div>`:''}
+      ${e.postalCode?`<div class="detail-item"><label>Postal Code</label><p>${e.postalCode}</p></div>`:''}
+      ${e.secondaryNo?`<div class="detail-item"><label>Secondary No.</label><p>${e.secondaryNo}</p></div>`:''}
     </div></div>`:''}
+
+    <!-- OFFBOARDING (only if applicable) -->
+    ${e.lastWorkingDate?`<div class="detail-section" style="border-left:4px solid var(--red);border-radius:var(--radius-sm)"><div class="detail-section-title" style="color:var(--red)">📋 Offboarding</div><div class="detail-grid">
+      <div class="detail-item"><label>Last Working Date</label><p style="font-weight:700;color:var(--red)">${val(e.lastWorkingDate)}</p></div>
+      <div class="detail-item"><label>EOS Confirmed</label><p>${val(e.eosConfirmed)}</p></div>
+      ${e.eosAmountPaid?`<div class="detail-item"><label>EOS Amount Paid</label><p style="font-weight:700">${sar(e.eosAmountPaid)}</p></div>`:''}
+    </div>
+    <div style="margin-top:8px">${doc('Termination Doc', e.terminationDoc)}</div>
+    </div>`:''}
+
+    <!-- QUICK ACTIONS -->
     <div style="margin-top:20px"><div class="section-label">Quick Actions</div>
     <div class="btn-row" style="flex-wrap:wrap;gap:8px">
-      <button class="btn btn-secondary" onclick="openAddVacation('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">🏖️ Leave</button>
-      <button class="btn btn-secondary" onclick="openAddWarning('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">⚠️ Warning</button>
-      <button class="btn btn-secondary" onclick="openAddDeduction('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">➖ Deduction</button>
-      <button class="btn btn-secondary" onclick="openSalaryAdj('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">💰 Salary Adj</button>
-      <button class="btn btn-secondary" onclick="openAddLoan('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">🏦 Loan</button>
-      <button class="btn btn-danger"    onclick="openSetLastDay('${e.empNo}','${(e.nameEn||'').replace(/'/g,'_')}')">📋 Last Day</button>
+      <button class="btn btn-secondary" onclick="openAddVacation('${e.empNo}','${nm}')">🏖️ Leave</button>
+      <button class="btn btn-secondary" onclick="openAddWarning('${e.empNo}','${nm}')">⚠️ Warning</button>
+      <button class="btn btn-secondary" onclick="openAddDeduction('${e.empNo}','${nm}')">➖ Deduction</button>
+      <button class="btn btn-secondary" onclick="openSalaryAdj('${e.empNo}','${nm}')">💰 Salary Adj</button>
+      <button class="btn btn-secondary" onclick="openAddLoan('${e.empNo}','${nm}')">🏦 Loan</button>
+      <button class="btn btn-danger"    onclick="openSetLastDay('${e.empNo}','${nm}')">📋 Last Day</button>
     </div></div>`;
 }
 

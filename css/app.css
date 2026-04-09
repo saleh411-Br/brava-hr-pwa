@@ -109,7 +109,7 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 
 /* ── Search ──────────────────────────────────────────────── */
 .search-wrap { position:relative; margin-bottom:16px; }
-.search-wrap input { width:100%; padding:12px 44px 12px 16px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:15px; background:var(--surface); outline:none; font-family:inherit; transition:.2s; }
+.search-wrap input { width:100%; padding:0 44px 0 16px; height:46px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:15px; background:var(--surface); outline:none; font-family:inherit; transition:.2s; }
 .search-wrap input:focus { border-color:var(--navy); }
 .search-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--muted); pointer-events:none; }
 
@@ -133,7 +133,7 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
 /* ── Buttons ─────────────────────────────────────────────── */
-.btn { padding:12px 20px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:.15s; }
+.btn { padding:0 20px; height:46px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:.15s; display:inline-flex; align-items:center; justify-content:center; }
 .btn:active { transform:scale(.97); }
 .btn-primary { background:var(--navy); color:#fff; width:100%; }
 .btn-primary:hover { background:var(--navy-lt); }
@@ -253,3 +253,17 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 .pin-btn-clear { font-size: 18px; }
 .pin-btn-ok { background: rgba(255,255,255,.2); }
 .pin-hint { color: rgba(255,255,255,.4); font-size: 11px; }
+
+/* ── Full width detail item ──────────────────────────── */
+.detail-item.full { grid-column: span 2; }
+.detail-item.full label { display:block; font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; margin-bottom:4px; }
+
+/* ── Document row in detail view ─────────────────────── */
+.doc-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); }
+.doc-row:last-child { border-bottom:none; }
+.doc-row-label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+.doc-view-btn { display:inline-flex; align-items:center; gap:5px; background:var(--cyan-lt); color:var(--navy); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.doc-missing { font-size:12px; color:var(--border); font-style:italic; }
+
+/* ── Lock screen logo ────────────────────────────────── */
+.lock-logo img { height:80px; width:auto; }

@@ -83,3 +83,5 @@ API.addAbsence        = async function(d)     { return this.call('addAbsence', d
 API.addHolidayRep     = async function(d)     { return this.call('addHolidayReplacement', d); };
 API.addLoanDeduction  = async function(d)     { return this.call('addLoanDeduction', d); };
 API.deleteRecord      = async function(type, row) { return this.call('deleteRecord', { type, row }); };
+
+API.getEmployeeLoans = async function(empNo) { return this.call('getEmployeeLoans', { empNo }); };

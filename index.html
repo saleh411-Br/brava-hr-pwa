@@ -85,7 +85,7 @@
     <div id="page-employees" class="page">
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:stretch">
         <div class="search-wrap" style="flex:1;margin-bottom:0">
-          <input id="emp-search" type="search" placeholder="Search name or employee number…" />
+          <input id="emp-search" type="search" placeholder="Filter by name or employee number…" />
           <span class="search-icon">🔍</span>
         </div>
         <button class="btn btn-primary" style="white-space:nowrap;padding:0 16px;height:46px" onclick="openAddEmployee()">＋ Add</button>
@@ -384,11 +384,47 @@
       <div class="section-label">Health Certificate</div>
       <div class="upload-section"><span class="upload-section-label">🏥 Health Certificate</span><div id="upload-ee-healthcert"></div><input type="hidden" id="ee-copyHealthCert" /></div>
 
+      <div class="section-label">Expiry Dates</div>
+      <div class="form-row">
+        <div class="form-group"><label>Labor Expiry</label><input id="ee-laborExpiry" type="date" /></div>
+        <div class="form-group"><label>Insurance Expiry</label><input id="ee-insuranceExpiry" type="date" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Health Cert Expiry</label><input id="ee-healthCertExpiry" type="date" /></div>
+        <div class="form-group"><label>Health Safety Expiry</label><input id="ee-healthSafetyExpiry" type="date" /></div>
+      </div>
+      <div class="form-group"><label>Health Cert No.</label><input id="ee-healthCertNo" /></div>
+      <div class="form-group"><label>Insurance Policy No.</label><input id="ee-insurancePolicyNo" /></div>
+      <div class="form-group"><label>Insurance Provider</label><input id="ee-insuranceProvider" /></div>
+      <div class="form-group"><label>No. of Dependants</label><input id="ee-noDependants" type="number" /></div>
+
+      <div class="section-label">Food Allowance</div>
+      <div class="form-row">
+        <div class="form-group"><label>Eligible</label>
+          <select id="ee-foodEligible"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+        <div class="form-group"><label>Amount (SAR)</label><input id="ee-foodAmount" type="number" step="0.01" /></div>
+      </div>
+      <div class="form-group"><label>Food Allowance (in salary)</label><input id="ee-foodAllowance" type="number" step="0.01" /></div>
+
+      <div class="section-label">Banking</div>
+      <div class="form-row">
+        <div class="form-group"><label>Bank Code</label><input id="ee-bankCode" /></div>
+      </div>
+
       <div class="section-label">National Address</div>
       <div class="form-row">
         <div class="form-group"><label>Short Address</label><input id="ee-shortAddress" style="text-transform:uppercase" /></div>
-        <div class="form-group"><label>City</label><input id="ee-city" /></div>
+        <div class="form-group"><label>Building No.</label><input id="ee-buildingNo" /></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label>Street Name</label><input id="ee-streetName" /></div>
+        <div class="form-group"><label>District</label><input id="ee-district" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input id="ee-city" /></div>
+        <div class="form-group"><label>Postal Code</label><input id="ee-postalCode" /></div>
+      </div>
+      <div class="form-group"><label>Secondary No.</label><input id="ee-secondaryNo" /></div>
 
       <div class="section-label">Emergency Contact</div>
       <div class="form-row">
@@ -508,7 +544,7 @@
       <div class="form-group"><label>Leave Type *</label>
         <select id="fvac-type">
           <option>Annual Leave</option><option>Sick Leave</option><option>Emergency Leave</option>
-          <option>Wedding Leave</option><option>Funeral Leave</option><option>Unpaid Leave</option>
+          <option>Wedding Leave</option><option>Funeral Leave</option><option>Maternity Leave</option><option>Unpaid Leave</option>
         </select></div>
       <div class="form-row">
         <div class="form-group"><label>Start Date *</label><input id="fvac-start" type="date" /></div>
@@ -629,6 +665,58 @@
       <div class="upload-section"><span class="upload-section-label">✈️ Final Exit Ticket</span><div id="upload-lastday-ticket"></div><input type="hidden" id="flastday-ticket" /></div>
       <button class="btn btn-primary" onclick="submitLastDay()">✅ Set Last Day</button>
     </form>
+  </div>
+</div>
+
+
+<!-- Absence Panel -->
+<div id="panel-form-abs" class="panel">
+  <div class="panel-header"><button class="panel-back" onclick="closePanel('panel-form-abs')">‹</button><span id="form-abs-title" class="panel-title">Record Absence</span></div>
+  <div class="panel-body"><form id="form-abs" onsubmit="return false">
+    <input type="hidden" id="fabs-empno" />
+    <div class="form-row"><div class="form-group"><label>Start Date *</label><input id="fabs-start" type="date" /></div><div class="form-group"><label>End Date *</label><input id="fabs-end" type="date" /></div></div>
+    <div class="form-group"><label>Reason *</label><textarea id="fabs-reason" rows="3"></textarea></div>
+    <button class="btn btn-primary" onclick="submitAbsence()">✅ Record Absence</button>
+  </form></div>
+</div>
+
+<!-- Holiday Replacement Panel -->
+<div id="panel-form-holrep" class="panel">
+  <div class="panel-header"><button class="panel-back" onclick="closePanel('panel-form-holrep')">‹</button><span id="form-holrep-title" class="panel-title">Holiday Replacement</span></div>
+  <div class="panel-body"><form id="form-holrep" onsubmit="return false">
+    <input type="hidden" id="fholrep-empno" />
+    <div class="form-group"><label>Holiday Type</label><input id="fholrep-type" placeholder="e.g. National Day" /></div>
+    <div class="form-group"><label>Scenario</label>
+      <select id="fholrep-scenario"><option value="overlap">Vacation Overlap (days added back)</option><option value="worked">Worked During Holiday</option></select></div>
+    <div class="form-row"><div class="form-group"><label>Holiday Start *</label><input id="fholrep-start" type="date" /></div><div class="form-group"><label>Holiday End *</label><input id="fholrep-end" type="date" /></div></div>
+    <button class="btn btn-primary" onclick="submitHolidayRep()">✅ Record</button>
+  </form></div>
+</div>
+
+<!-- Loan Deduction Panel -->
+<div id="panel-form-loanded" class="panel">
+  <div class="panel-header"><button class="panel-back" onclick="closePanel('panel-form-loanded')">‹</button><span id="form-loanded-title" class="panel-title">Record Loan Deduction</span></div>
+  <div class="panel-body"><form id="form-loanded" onsubmit="return false">
+    <input type="hidden" id="floanded-empno" />
+    <div class="form-group"><label>Loan ID *</label><input id="floanded-loanid" placeholder="e.g. LN-0001" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Actual Amount Paid *</label><input id="floanded-amount" type="number" step="0.01" /></div>
+      <div class="form-group"><label>Date *</label><input id="floanded-date" type="date" /></div>
+    </div>
+    <button class="btn btn-primary" onclick="submitLoanDed()">✅ Record Deduction</button>
+  </form></div>
+</div>
+
+<!-- Convert Hire Panel -->
+<div id="panel-convert-hire" class="panel">
+  <div class="panel-header"><button class="panel-back" onclick="closePanel('panel-convert-hire')">‹</button><span class="panel-title">Convert to Employee</span></div>
+  <div class="panel-body">
+    <div class="card" style="margin-bottom:16px">
+      <p style="font-size:13px;color:var(--muted)">Converting <strong id="convert-hire-name"></strong> to a full employee record.</p>
+    </div>
+    <div class="form-group"><label>Joining Date *</label><input id="convert-joining" type="date" /></div>
+    <p style="font-size:11px;color:var(--amber);margin-bottom:12px">⚠️ This will create a new employee record and mark the hire as Converted.</p>
+    <button class="btn btn-primary" onclick="submitConvertHire()">👤 Convert to Employee</button>
   </div>
 </div>
 

@@ -141,12 +141,12 @@ async function loadDashboard(){
       <div class="stat-card info"><div class="stat-value">${stats.onLeave||0}</div><div class="stat-label">On Vacation</div></div>
       <div class="stat-card warn"><div class="stat-value">${stats.expiring||0}</div><div class="stat-label">Docs Expiring</div></div>
     </div>${br.length?`<div class="card" style="margin-top:0"><div class="card-header"><span class="card-title">By Branch</span></div>${br.map(([b,n])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600">${b}</span><span style="font-size:13px;color:var(--navy);font-weight:700">${n}</span></div>`).join('')}</div>`:''}`;
-    document.getElementById('dash-vac').innerHTML=vac.length?vac.map(v=>`<div class="vac-item"><div><div class="vac-name">${v.name}</div><div class="vac-meta">${v.type} · ${v.startDate} → ${v.endDate}</div></div><div class="vac-days">${v.daysLeft}d left</div></div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
+    document.getElementById('dash-vac').innerHTML=vac.length?vac.map(v=>`<div class="vac-item" onclick="quickEmpView('${v.empNo}')" style="cursor:pointer"><div><div class="vac-name">${v.name} <span style="font-size:11px;color:var(--muted);font-weight:400">${v.branch?'· '+v.branch:''}</span></div><div class="vac-meta">${v.type} · ${v.startDate} → ${v.endDate}</div></div><div class="vac-days">${v.daysLeft}d left</div></div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
     // Alerts sorted by category
     const docOrder=["Iqama/ID","Passport","Contract","Labor License","Health Cert","Health Safety","Insurance"];
     alerts.sort((a,b)=>{const ai=docOrder.indexOf(a.doc),bi=docOrder.indexOf(b.doc);return ai===bi?a.days-b.days:ai-bi;});
     let alertHtml='',curDoc=null;
-    alerts.slice(0,30).forEach(a=>{
+    alerts.forEach(a=>{
       if(a.doc!==curDoc){curDoc=a.doc;alertHtml+=`<div style="background:var(--navy);color:#fff;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:4px;margin:8px 0 4px">📄 ${a.doc}</div>`;}
       const cls=a.days<0?'expired':a.days<=7?'critical':a.days<=15?'warning':'notice';
       const lbl=a.days<0?`${Math.abs(a.days)}d EXPIRED`:`${a.days}d`;
@@ -258,9 +258,11 @@ function renderEmployeeDetail(e){
       ${e.district?`<div class="detail-item"><label>District</label><p>${e.district}</p></div>`:''}
       ${e.postalCode?`<div class="detail-item"><label>Postal Code</label><p>${e.postalCode}</p></div>`:''}
     </div></div>`:''}
-    ${e.lastWorkingDate?`<div class="detail-section" style="border-left:4px solid var(--red)"><div class="detail-section-title" style="color:var(--red)">📋 Offboarding</div><div class="detail-grid">
-      <div class="detail-item"><label>Last Day</label><p style="font-weight:700;color:var(--red)">${val(e.lastWorkingDate)}</p></div>
-      <div class="detail-item"><label>EOS Confirmed</label><p>${val(e.eosConfirmed)}</p></div>
+    ${(e.lastWorkingDate||e.eosConfirmed)?`<div class="detail-section" style="border-left:4px solid var(--red)"><div class="detail-section-title" style="color:var(--red)">📋 Offboarding & EOS</div><div class="detail-grid">
+      <div class="detail-item"><label>Last Working Day</label><p style="font-weight:700;color:var(--red)">${val(e.lastWorkingDate)}</p></div>
+      <div class="detail-item"><label>EOS Confirmed</label><p>${val(e.eosConfirmed)||'—'}</p></div>
+      ${e.eosAmountPaid?`<div class="detail-item"><label>EOS Paid</label><p style="font-weight:700;color:var(--green)">${sar(e.eosAmountPaid)}</p></div>`:''}
+      <div class="detail-item"><label>EOS Accrual</label><p style="font-weight:700">${sar(e.eosAccrual)}</p></div>
     </div>${doc('Termination Doc',e.terminationDoc)}</div>`:''}
     <div style="margin-top:20px"><div class="section-label">Quick Actions</div>
     <div class="btn-row" style="flex-wrap:wrap;gap:8px">
@@ -286,28 +288,80 @@ async function loadEmpRecords(empNo){
   try{
     const r=await API.getEmployeeRecords(empNo);
     let html='';
+
     // Vacations
     if(r.vacations&&r.vacations.length){
       html+=`<div class="detail-section-title">🏖️ Vacations</div>`;
-      r.vacations.forEach(v=>{html+=`<div class="rec-row"><div><strong>${v.type}</strong> · ${v.start} → ${v.end} (${v.days} days)</div><button class="rec-del" onclick="deleteRecord('vacation',${v._row},'${empNo}')">🗑️</button></div>`;});
+      r.vacations.forEach(v=>{
+        html+=`<div class="rec-row">
+          <div style="flex:1;min-width:0"><strong>${v.type}</strong><br><span style="font-size:11px;color:var(--muted)">${v.start} → ${v.end} · ${v.days} days</span></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="rec-edit" onclick="editRecord('vacation',${v._row},'${empNo}',${JSON.stringify(v).replace(/'/g,"&#39;")})">✏️</button>
+            <button class="rec-del" onclick="deleteRecord('vacation',${v._row},'${empNo}')">🗑️</button>
+          </div></div>`;
+      });
     }
+
     // Warnings
     if(r.warnings&&r.warnings.length){
       html+=`<div class="detail-section-title" style="margin-top:12px">⚠️ Warnings</div>`;
-      r.warnings.forEach(w=>{html+=`<div class="rec-row"><div><strong>${w.date}</strong> · ${w.reason}</div><button class="rec-del" onclick="deleteRecord('warning',${w._row},'${empNo}')">🗑️</button></div>`;});
+      r.warnings.forEach(w=>{
+        html+=`<div class="rec-row">
+          <div style="flex:1;min-width:0"><strong>${w.date}</strong><br><span style="font-size:11px;color:var(--muted)">${w.reason}</span></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="rec-del" onclick="deleteRecord('warning',${w._row},'${empNo}')">🗑️</button>
+          </div></div>`;
+      });
     }
+
     // Loans
     if(r.loans&&r.loans.length){
       html+=`<div class="detail-section-title" style="margin-top:12px">🏦 Loans</div>`;
-      r.loans.forEach(l=>{html+=`<div class="rec-row"><div><strong>${l.loanId}</strong> · SAR ${parseFloat(l.amount).toLocaleString()} · ${l.months} months · <span style="color:${l.status==='Active'?'var(--amber)':'var(--green)'}">${l.status}</span></div><button class="rec-del" onclick="deleteRecord('loan',${l._row},'${empNo}')">🗑️</button></div>`;});
+      r.loans.forEach(l=>{
+        html+=`<div class="rec-row">
+          <div style="flex:1;min-width:0"><strong>${l.loanId}</strong> · SAR ${parseFloat(l.amount).toLocaleString()}<br><span style="font-size:11px;color:var(--muted)">${l.months} months · <span style="color:${l.status==='Active'?'var(--amber)':'var(--green)'}">${l.status}</span></span></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="rec-del" onclick="deleteRecord('loan',${l._row},'${empNo}')">🗑️</button>
+          </div></div>`;
+      });
     }
+
     // Absences
     if(r.absences&&r.absences.length){
       html+=`<div class="detail-section-title" style="margin-top:12px">🚫 Absences</div>`;
-      r.absences.forEach(a=>{html+=`<div class="rec-row"><div><strong>${a.start} → ${a.end}</strong> (${a.days} days) · ${a.reason}</div><button class="rec-del" onclick="deleteRecord('absence',${a._row},'${empNo}')">🗑️</button></div>`;});
+      r.absences.forEach(a=>{
+        html+=`<div class="rec-row">
+          <div style="flex:1;min-width:0"><strong>${a.start} → ${a.end}</strong> · ${a.days} days<br><span style="font-size:11px;color:var(--muted)">${a.reason}</span></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="rec-edit" onclick="editAbsenceRecord(${a._row},'${empNo}','${a.start}','${a.end}','${a.reason}')">✏️</button>
+            <button class="rec-del" onclick="deleteRecord('absence',${a._row},'${empNo}')">🗑️</button>
+          </div></div>`;
+      });
     }
-    panel.innerHTML=html||'<p style="color:var(--muted);font-size:13px">No records found.</p>';
+
+    panel.innerHTML=html||'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No records found.</p>';
   }catch(e){panel.innerHTML=`<p style="color:red">${e.message}</p>`;}
+}
+
+// Edit vacation record
+function editRecord(type, row, empNo, data) {
+  if(type==='vacation') {
+    document.getElementById('fvac-empno').value = empNo;
+    document.getElementById('form-vac-title').textContent = 'Edit Leave Record';
+    // Pre-fill
+    document.getElementById('fvac-type').value = data.type || 'Annual Leave';
+    openPanel('panel-form-vac');
+  }
+}
+
+// Edit absence record
+function editAbsenceRecord(row, empNo, start, end, reason) {
+  document.getElementById('fabs-empno').value = empNo;
+  document.getElementById('form-abs-title').textContent = 'Edit Absence';
+  document.getElementById('fabs-start').value = start;
+  document.getElementById('fabs-end').value = end;
+  document.getElementById('fabs-reason').value = reason;
+  openPanel('panel-form-abs');
 }
 
 async function deleteRecord(type,row,empNo){

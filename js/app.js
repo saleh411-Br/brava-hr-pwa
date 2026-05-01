@@ -1,35 +1,5 @@
 // Brava HR PWA — Main App v3.0
 
-// ── Hijri Converter (Umm Al-Qura approximation) ───────────
-const HIJRI_EPOCH = 1948440; // Julian Day of 1 Muharram 1 AH
-function hijriToGregorian(hy, hm, hd) {
-  // Approximate conversion using Gregorian calendar
-  const N = Math.floor((11 * hy + 3) / 30) + 354 * hy + 30 * hm
-          - Math.floor((hm - 1) / 2) + hd + 1948440 - 385;
-  let l = N + 68569, n = Math.floor(4 * l / 146097);
-  l = l - Math.floor((146097 * n + 3) / 4);
-  let i = Math.floor(4000 * (l + 1) / 1461001);
-  l = l - Math.floor(1461 * i / 4) + 31;
-  let j = Math.floor(80 * l / 2447);
-  const day = l - Math.floor(2447 * j / 80);
-  l = Math.floor(j / 11);
-  const month = j + 2 - 12 * l;
-  const year = 100 * (n - 49) + i + l;
-  return { year, month, day };
-}
-function parseHijriInput(val) {
-  // Accept: 1447/10/14 or 14/10/1447 or 14-10-1447
-  if (!val) return null;
-  const parts = val.split(/[\/\-\.]/);
-  if (parts.length !== 3) return null;
-  let hy, hm, hd;
-  if (parseInt(parts[0]) > 1000) { hy=+parts[0]; hm=+parts[1]; hd=+parts[2]; }
-  else { hd=+parts[0]; hm=+parts[1]; hy=+parts[2]; }
-  if (!hy||!hm||!hd) return null;
-  const g = hijriToGregorian(hy, hm, hd);
-  return `${g.year}-${String(g.month).padStart(2,'0')}-${String(g.day).padStart(2,'0')}`;
-}
-
 // ── PIN LOCK ───────────────────────────────────────────────
 const DEFAULT_PIN = '1234';
 let _pinBuffer = '';
@@ -67,38 +37,6 @@ function navigate(page){
 function refreshPage(){if(State.page==='dashboard')loadDashboard();else if(State.page==='employees')loadAllEmployees();else if(State.page==='hires')loadHires(State.hiresFilter);}
 function openPanel(id){document.getElementById(id)?.classList.add('open');}
 function closePanel(id){document.getElementById(id)?.classList.remove('open');}
-
-// ── HIJRI DATE INPUT HELPER ────────────────────────────────
-// Converts a hijri input field value to gregorian before form submission
-function setupHijriField(inputId) {
-  const el = document.getElementById(inputId);
-  if (!el) return;
-  // Add a toggle button next to it
-  const wrap = el.parentElement;
-  const toggle = document.createElement('div');
-  toggle.style.cssText = 'display:flex;gap:6px;margin-top:4px';
-  toggle.innerHTML = `
-    <select id="${inputId}-mode" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:#fff">
-      <option value="gregorian">Gregorian</option>
-      <option value="hijri">Hijri (converts auto)</option>
-    </select>
-    <input id="${inputId}-hijri" placeholder="e.g. 1447/10/14" style="display:none;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;flex:1" />
-    <span id="${inputId}-converted" style="font-size:11px;color:var(--green);align-self:center"></span>`;
-  wrap.appendChild(toggle);
-
-  document.getElementById(`${inputId}-mode`).addEventListener('change', function() {
-    const isHijri = this.value === 'hijri';
-    el.style.display = isHijri ? 'none' : '';
-    document.getElementById(`${inputId}-hijri`).style.display = isHijri ? '' : 'none';
-  });
-
-  document.getElementById(`${inputId}-hijri`).addEventListener('input', function() {
-    const greg = parseHijriInput(this.value);
-    const conv = document.getElementById(`${inputId}-converted`);
-    if (greg) { el.value = greg; conv.textContent = '→ '+greg; }
-    else { conv.textContent = 'Invalid format'; }
-  });
-}
 
 // ── FILE UPLOAD WIDGET ─────────────────────────────────────
 window.__uploadCallbacks={};
@@ -141,7 +79,17 @@ async function loadDashboard(){
       <div class="stat-card info"><div class="stat-value">${stats.onLeave||0}</div><div class="stat-label">On Vacation</div></div>
       <div class="stat-card warn"><div class="stat-value">${stats.expiring||0}</div><div class="stat-label">Docs Expiring</div></div>
     </div>${br.length?`<div class="card" style="margin-top:0"><div class="card-header"><span class="card-title">By Branch</span></div>${br.map(([b,n])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600">${b}</span><span style="font-size:13px;color:var(--navy);font-weight:700">${n}</span></div>`).join('')}</div>`:''}`;
-    document.getElementById('dash-vac').innerHTML=vac.length?vac.map(v=>`<div class="vac-item" onclick="quickEmpView('${v.empNo}')" style="cursor:pointer"><div><div class="vac-name">${v.name} <span style="font-size:11px;color:var(--muted);font-weight:400">${v.branch?'· '+v.branch:''}</span></div><div class="vac-meta">${v.type} · ${v.startDate} → ${v.endDate}</div></div><div class="vac-days">${v.daysLeft}d left</div></div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
+    document.getElementById('dash-vac').innerHTML=vac.length?vac.map(v=>`
+      <div class="vac-item">
+        <div style="flex:1;cursor:pointer" onclick="quickEmpView('${v.empNo}')">
+          <div class="vac-name">${v.name} <span style="font-size:11px;color:var(--muted);font-weight:400">${v.branch?'· '+v.branch:''}</span></div>
+          <div class="vac-meta">${v.type} · ${v.startDate} → ${v.endDate}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <div class="vac-days">${v.daysLeft}d left</div>
+          <button class="btn btn-success" style="padding:3px 10px;font-size:11px;height:auto" onclick="openReturnFromVacation('${v.empNo}','${v.name}','${v.endDate}',${i})">↩ Return</button>
+        </div>
+      </div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
     // Alerts sorted by category
     const docOrder=["Iqama/ID","Passport","Contract","Labor License","Health Cert","Health Safety","Insurance"];
     alerts.sort((a,b)=>{const ai=docOrder.indexOf(a.doc),bi=docOrder.indexOf(b.doc);return ai===bi?a.days-b.days:ai-bi;});
@@ -400,7 +348,6 @@ function openAddEmployee(){
   document.getElementById('add-emp-form').reset(); openPanel('panel-add-emp');
   setTimeout(()=>{
     initUploads([['upload-ae-id','ID Documents','ae-copyId'],['upload-ae-passport','Passport Copies','ae-copyPassport'],['upload-ae-contract','Contracts','ae-copyContract'],['upload-ae-healthcert','Health Certificates','ae-copyHealthCert']]);
-    ['ae-joiningDate','ae-laborExpiry','ae-healthCertExpiry','ae-healthSafetyExpiry','ae-insuranceExpiry'].forEach(setupHijriField);
   },100);
 }
 async function submitAddEmployee(){
@@ -436,7 +383,6 @@ function openEditEmployee(){
   const folder=`Employees/${e.nameEn}`;
   setTimeout(()=>{
     initUploads([['upload-ee-id',folder+'/ID','ee-copyId'],['upload-ee-passport',folder+'/Passport','ee-copyPassport'],['upload-ee-contract',folder+'/Contract','ee-copyContract'],['upload-ee-healthcert',folder+'/HealthCert','ee-copyHealthCert']]);
-    ['ee-laborExpiry','ee-insuranceExpiry','ee-healthCertExpiry','ee-healthSafetyExpiry'].forEach(setupHijriField);
   },100);
 }
 async function submitEditEmployee(){
@@ -471,45 +417,51 @@ function openAddVacation(empNo,name){document.getElementById('form-vac').reset()
 async function submitVacation(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fvac-empno'),vacType:g('fvac-type'),startDate:g('fvac-start'),endDate:g('fvac-end'),ticketBy:g('fvac-ticketBy'),ticketCost:g('fvac-ticketCost'),exitVisa:g('fvac-exitVisa'),docLink:g('fvac-doc'),exitVisaDoc:g('fvac-exitVisaDoc'),exitVisaTicket:g('fvac-exitVisaTicket')};if(!d.vacType||!d.startDate||!d.endDate){toast('Fill required fields','err');return;}try{const r=await API.addVacation(d);toast(r.msg||'Leave recorded','ok');closePanel('panel-form-vac');}catch(e){toast(e.message,'err');}}
 
 function openAddWarning(empNo,name){document.getElementById('form-warn').reset();document.getElementById('fwarn-empno').value=empNo;document.getElementById('form-warn-title').textContent=`Warning — ${name}`;openPanel('panel-form-warn');setTimeout(()=>initUploads([['upload-warn-doc',`Employees/${name}/Warnings`,'fwarn-doc']]),100);}
-async function submitWarning(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fwarn-empno'),warningDate:g('fwarn-date'),reason:g('fwarn-reason'),docLink:g('fwarn-doc')};if(!d.warningDate||!d.reason){toast('Fill required fields','err');return;}try{const r=await API.addWarning(d);toast(r.msg||'Warning recorded','ok');closePanel('panel-form-warn');}catch(e){toast(e.message,'err');}}
+async function submitWarning(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fwarn-empno'),warningDate:g('fwarn-date'),reason:g('fwarn-reason'),docLink:g('fwarn-doc')};if(!d.warningDate||!d.reason){toast('Fill required fields','err');return;}try{
+    const r=await API.addWarning(d);
+    toast(r.msg||'✅ Warning recorded','ok');
+    document.getElementById('form-warn').reset();
+    closePanel('panel-form-warn');
+    if(_currentRecordsEmpNo) setTimeout(()=>loadEmpRecords(_currentRecordsEmpNo),500);
+  }catch(e){toast(e.message,'err');}}
 
 function openAddDeduction(empNo,name){document.getElementById('form-ded').reset();document.getElementById('fded-empno').value=empNo;document.getElementById('fded-date').value=new Date().toISOString().split('T')[0];document.getElementById('form-ded-title').textContent=`Deduction — ${name}`;openPanel('panel-form-ded');}
 async function submitDeduction(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fded-empno'),deductionDate:g('fded-date'),amount:g('fded-amount'),category:g('fded-cat'),notes:g('fded-notes')};if(!d.amount||parseFloat(d.amount)<=0){toast('Enter valid amount','err');return;}try{const r=await API.addDeduction(d);toast(r.msg||'Deduction saved','ok');closePanel('panel-form-ded');}catch(e){toast(e.message,'err');}}
 
 function openSalaryAdj(empNo,name){document.getElementById('form-sal').reset();document.getElementById('fsal-empno').value=empNo;document.getElementById('fsal-date').value=new Date().toISOString().split('T')[0];document.getElementById('form-sal-title').textContent=`Salary Adj — ${name}`;openPanel('panel-form-sal');}
-async function submitSalaryAdj(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fsal-empno'),adjDate:g('fsal-date'),adjType:g('fsal-type'),field:g('fsal-field'),amount:g('fsal-amount'),notes:g('fsal-notes')};if(!d.amount||parseFloat(d.amount)<=0){toast('Enter valid amount','err');return;}try{const r=await API.addSalaryAdj(d);toast(r.msg||'Saved','ok');closePanel('panel-form-sal');}catch(e){toast(e.message,'err');}}
-
-function openAddLoan(empNo,name){document.getElementById('form-loan').reset();document.getElementById('floan-empno').value=empNo;document.getElementById('floan-date').value=new Date().toISOString().split('T')[0];document.getElementById('form-loan-title').textContent=`Loan — ${name}`;openPanel('panel-form-loan');}
-async function submitLoan(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('floan-empno'),loanDate:g('floan-date'),loanAmount:g('floan-amount'),months:g('floan-months'),notes:g('floan-notes')};if(!d.loanAmount||parseFloat(d.loanAmount)<=0){toast('Enter valid amount','err');return;}if(!d.months){toast('Enter months','err');return;}try{const r=await API.addLoan(d);toast(r.msg||'Loan recorded','ok');closePanel('panel-form-loan');}catch(e){toast(e.message,'err');}}
-
-function openAddAbsence(empNo,name){document.getElementById('form-abs').reset();document.getElementById('fabs-empno').value=empNo;document.getElementById('form-abs-title').textContent=`Absence — ${name}`;openPanel('panel-form-abs');}
-async function submitAbsence(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fabs-empno'),startDate:g('fabs-start'),endDate:g('fabs-end'),reason:g('fabs-reason')};if(!d.startDate||!d.endDate){toast('Fill dates','err');return;}try{const r=await API.addAbsence(d);toast(r.msg||'Absence recorded','ok');closePanel('panel-form-abs');}catch(e){toast(e.message,'err');}}
-
-function openAddHolidayRep(empNo,name){document.getElementById('form-holrep').reset();document.getElementById('fholrep-empno').value=empNo;document.getElementById('form-holrep-title').textContent=`Holiday Replacement — ${name}`;openPanel('panel-form-holrep');}
-async function submitHolidayRep(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('fholrep-empno'),holType:g('fholrep-type'),scenario:g('fholrep-scenario'),holStart:g('fholrep-start'),holEnd:g('fholrep-end')};if(!d.holStart||!d.holEnd){toast('Fill dates','err');return;}try{const r=await API.addHolidayRep(d);toast(r.msg||'Recorded','ok');closePanel('panel-form-holrep');}catch(e){toast(e.message,'err');}}
-
-async function openRecLoanDed(empNo,name){
-  document.getElementById('form-loanded').reset();
-  document.getElementById('floanded-empno').value=empNo;
-  document.getElementById('floanded-date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('form-loanded-title').textContent=`Loan Deduction — ${name}`;
-  // Load employee's active loans
-  const sel=document.getElementById('floanded-loanselect');
-  sel.innerHTML='<option value="">Loading loans…</option>';
-  document.getElementById('floanded-amount').value='';
-  document.getElementById('floanded-nextmonth').textContent='';
+async function submitSalaryAdj(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const adjType=g('fsal-type'),adjDate=g('fsal-date'),notes=g('fsal-notes'),empNo=g('fsal-empno');
+  const fields=[];
+  [['fsal-basic','Basic Salary'],['fsal-housing','Housing Allowance'],['fsal-food','Food Allowance'],['fsal-other','Other Incentives']].forEach(([id,name])=>{
+    const v=g(id);if(v&&parseFloat(v)>0)fields.push({field:name,amount:v});
+  });
+  if(!fields.length){toast('Enter at least one amount','err');return;}
+  const d={empNo,adjDate,adjType,fields,notes};
+  const btn=document.querySelector('#panel-form-sal .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try{
-    const loans=await API.getEmployeeLoans(empNo);
-    if(!loans.length){
-      sel.innerHTML='<option value="">No active loans found</option>';
-    } else {
-      sel.innerHTML='<option value="">— Select Loan —</option>'+
-        loans.map(l=>`<option value="${l.loanId}" data-amount="${l.nextAmount}" data-month="${l.nextMonth}">
-          ${l.loanId} · SAR ${parseFloat(l.amount).toLocaleString()} · ${l.pendingCount} payments left
-        </option>`).join('');
-    }
-  }catch(e){sel.innerHTML='<option value="">Error loading loans</option>';}
-  openPanel('panel-form-loanded');
+    const r=await API.addSalaryAdj(d);
+    toast(r.msg||'✅ Adjustment saved','ok');
+    document.getElementById('form-sal').reset();
+    closePanel('panel-form-sal');
+    if(State.currentEmp){const fresh=await API.getEmployee(State.currentEmp.empNo);State.currentEmp=fresh;renderEmployeeDetail(fresh);}
+  }catch(e){toast(e.message,'err');}
+  finally{if(btn){btn.disabled=false;btn.textContent='✅ Apply Adjustment';}}
+}
+
+function onLoanDedTypeChange(){
+  const t=document.getElementById('floan-dedtype')?.value;
+  const months=parseInt(document.getElementById('floan-months')?.value)||0;
+  const amount=parseFloat(document.getElementById('floan-amount')?.value)||0;
+  const cont=document.getElementById('floan-manual-fields');
+  if(!cont) return;
+  if(t==='manual'&&months>0){
+    const perMonth=amount>0?parseFloat((amount/months).toFixed(2)):0;
+    let html='<div style="font-size:12px;font-weight:700;color:var(--navy);margin:8px 0 4px">Monthly Amounts</div>';
+    for(let i=1;i<=months;i++) html+=`<div class="form-group"><label>Month ${i} (SAR)</label><input class="manual-month-amt" type="number" step="0.01" value="${perMonth}" /></div>`;
+    cont.innerHTML=html;
+  } else { cont.innerHTML=''; }
 }
 function onLoanSelect(){
   const sel=document.getElementById('floanded-loanselect');
@@ -656,3 +608,39 @@ window.addEventListener('DOMContentLoaded',()=>{
   let deb;
   document.getElementById('emp-search')?.addEventListener('input',e=>{clearTimeout(deb);deb=setTimeout(()=>filterEmployees(e.target.value.trim()),200);});
 });
+
+// ── Return from Vacation ──────────────────────────────────
+let _vacReturnData = null;
+function openReturnFromVacation(empNo, name, scheduledEnd, idx){
+  _vacReturnData = { empNo, name, scheduledEnd, idx };
+  document.getElementById('freturn-empno').value = empNo;
+  document.getElementById('freturn-scheduled').textContent = scheduledEnd;
+  document.getElementById('freturn-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('panel-return-title').textContent = `↩ Return — ${name}`;
+  openPanel('panel-form-return');
+}
+
+async function submitReturn(){
+  const retDate = document.getElementById('freturn-date').value;
+  if(!retDate){toast('Enter return date','err');return;}
+  const scheduled = _vacReturnData?.scheduledEnd || '';
+  const empNo     = _vacReturnData?.empNo || '';
+  const retD   = new Date(retDate);
+  const schedD = new Date(scheduled);
+  let note = 'Returned on schedule.';
+  if(retD < schedD){
+    const diff=Math.ceil((schedD-retD)/86400000);
+    note=`Returned ${diff} day(s) EARLY (scheduled: ${scheduled})`;
+    if(!confirm(`⚠️ ${note}\n\nProceed?`)) return;
+  } else if(retD > schedD){
+    const diff=Math.ceil((retD-schedD)/86400000);
+    note=`Returned ${diff} day(s) LATE (scheduled: ${scheduled})`;
+    if(!confirm(`⚠️ ${note}\n\nProceed?`)) return;
+  }
+  try{
+    await API.call('recordReturn',{empNo,returnDate:retDate,note});
+    toast('✅ Return recorded','ok');
+    closePanel('panel-form-return');
+    loadDashboard();
+  }catch(e){toast(e.message,'err');}
+}

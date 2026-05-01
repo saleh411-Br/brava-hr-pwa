@@ -669,7 +669,16 @@
       <input type="hidden" id="flastday-empno" />
       <div class="form-group"><label>Last Working Date *</label><input id="flastday-date" type="date" /></div>
       <div class="form-group"><label>Exit Reason</label>
-        <select id="flastday-reason"><option>Resigned</option><option>Terminated</option><option>Contract Expiry</option><option>Run Away</option><option>Deceased</option><option>Others</option></select></div>
+        <select id="flastday-reason">
+            <option>Resigned</option>
+            <option>Terminated</option>
+            <option>Terminated - Probation Period</option>
+            <option>Contract Expiry</option>
+            <option>Mutual Agreement</option>
+            <option>Run Away</option>
+            <option>Deceased</option>
+            <option>Others</option>
+          </select></div>
       <div class="form-group"><label>Final Exit Required</label>
         <select id="flastday-finalexit"><option value="No">No</option><option value="Yes">Yes</option></select></div>
       <div class="upload-section"><span class="upload-section-label">📄 Termination / Resignation Doc</span><div id="upload-lastday-doc"></div><input type="hidden" id="flastday-doc" /></div>

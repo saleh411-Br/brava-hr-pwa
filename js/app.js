@@ -89,7 +89,7 @@ async function loadDashboard(){
           <div class="vac-days">${v.daysLeft}d left</div>
           <button class="btn btn-success" style="padding:3px 10px;font-size:11px;height:auto" onclick="openReturnFromVacation('${v.empNo}','${v.name}','${v.endDate}',${i})">↩ Return</button>
         </div>
-      </div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
+      </div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
     // Alerts sorted by category
     const docOrder=["Iqama/ID","Passport","Contract","Labor License","Health Cert","Health Safety","Insurance"];
     alerts.sort((a,b)=>{const ai=docOrder.indexOf(a.doc),bi=docOrder.indexOf(b.doc);return ai===bi?a.days-b.days:ai-bi;});

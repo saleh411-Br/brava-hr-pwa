@@ -280,3 +280,11 @@ html, body { height:100%; font-family:'IBM Plex Sans Arabic',sans-serif; backgro
 /* ── Record edit button ──────────────────────────────────── */
 .rec-edit { background:var(--cyan-lt); color:var(--navy); border:1px solid var(--navy); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; flex-shrink:0; }
 .rec-edit:hover { background:var(--navy); color:#fff; }
+
+/* ── Employee group header ───────────────────────────────── */
+.emp-group-header {
+  font-size:11px; font-weight:700; color:var(--navy);
+  text-transform:uppercase; letter-spacing:.6px;
+  padding:8px 4px 4px; border-bottom:2px solid var(--cyan-lt);
+  margin-bottom:8px;
+}

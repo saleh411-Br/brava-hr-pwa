@@ -79,17 +79,18 @@ async function loadDashboard(){
       <div class="stat-card info"><div class="stat-value">${stats.onLeave||0}</div><div class="stat-label">On Vacation</div></div>
       <div class="stat-card warn"><div class="stat-value">${stats.expiring||0}</div><div class="stat-label">Docs Expiring</div></div>
     </div>${br.length?`<div class="card" style="margin-top:0"><div class="card-header"><span class="card-title">By Branch</span></div>${br.map(([b,n])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:600">${b}</span><span style="font-size:13px;color:var(--navy);font-weight:700">${n}</span></div>`).join('')}</div>`:''}`;
-    document.getElementById('dash-vac').innerHTML=vac.length?vac.map(v=>`
-      <div class="vac-item">
+    document.getElementById('dash-vac').innerHTML=vac.length?vac.map((v,i)=>{
+      const nm=(v.name||v.nameEn||'Unknown').replace(/'/g,'_');
+      return `<div class="vac-item">
         <div style="flex:1;cursor:pointer" onclick="quickEmpView('${v.empNo}')">
-          <div class="vac-name">${v.name} <span style="font-size:11px;color:var(--muted);font-weight:400">${v.branch?'· '+v.branch:''}</span></div>
+          <div class="vac-name">${v.name||v.nameEn||'—'} <span style="font-size:11px;color:var(--muted);font-weight:400">${v.branch?'· '+v.branch:''}</span></div>
           <div class="vac-meta">${v.type} · ${v.startDate} → ${v.endDate}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <div class="vac-days">${v.daysLeft}d left</div>
-          <button class="btn btn-success" style="padding:3px 10px;font-size:11px;height:auto" onclick="openReturnFromVacation('${v.empNo}','${v.name}','${v.endDate}',${i})">↩ Return</button>
+          <button class="btn btn-success" style="padding:3px 10px;font-size:11px;height:auto" onclick="openReturnFromVacation('${v.empNo}','${nm}','${v.endDate}',${i})">↩ Return</button>
         </div>
-      </div>`).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
+      </div>`;}).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No one on vacation.</p>';
     // Alerts sorted by category
     const docOrder=["Iqama/ID","Passport","Contract","Labor License","Health Cert","Health Safety","Insurance"];
     alerts.sort((a,b)=>{const ai=docOrder.indexOf(a.doc),bi=docOrder.indexOf(b.doc);return ai===bi?a.days-b.days:ai-bi;});
@@ -116,7 +117,34 @@ async function loadAllEmployees(){
 function renderEmployeeList(list){
   const el=document.getElementById('emp-list');
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">😕</div><p>No employees found</p></div>';return;}
-  el.innerHTML=list.map((e,i)=>{const ini=(e.nameEn||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();const sc=(e.status||'Active').replace(/\s/g,'');return `<div class="emp-card" onclick="openEmployeeByNo('${e.empNo}')"><div class="emp-avatar">${ini}</div><div style="flex:1;min-width:0"><div class="emp-name">${e.nameEn||'—'}<span class="emp-badge b-${sc}">${e.status}</span></div><div class="emp-meta">${e.empNo} · ${e.jobTitle||'—'} · ${e.branch||'—'}</div></div><div style="color:var(--muted);font-size:20px">›</div></div>`;}).join('');
+  
+  // Group by Active vs Inactive
+  const active   = list.filter(e=>String(e.status||'').trim()==='Active');
+  const inactive = list.filter(e=>String(e.status||'').trim()!=='Active');
+  
+  function empCard(e){
+    const ini=(e.nameEn||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const sc=(e.status||'Active').replace(/\s/g,'');
+    return `<div class="emp-card" onclick="openEmployeeByNo('${e.empNo}')">
+      <div class="emp-avatar">${ini}</div>
+      <div style="flex:1;min-width:0">
+        <div class="emp-name">${e.nameEn||'—'}<span class="emp-badge b-${sc}">${e.status}</span></div>
+        <div class="emp-meta">${e.empNo} · ${e.jobTitle||'—'} · ${e.branch||'—'}</div>
+      </div>
+      <div style="color:var(--muted);font-size:20px">›</div>
+    </div>`;
+  }
+  
+  let html = '';
+  if(active.length){
+    html += `<div class="emp-group-header">👥 Active (${active.length})</div>`;
+    html += active.map(empCard).join('');
+  }
+  if(inactive.length){
+    html += `<div class="emp-group-header" style="margin-top:16px">📁 Inactive (${inactive.length})</div>`;
+    html += inactive.map(empCard).join('');
+  }
+  el.innerHTML = html;
 }
 function filterEmployees(q){
   if(!q||q.length<1){renderEmployeeList(State.allEmployees);return;}
@@ -483,6 +511,68 @@ async function submitLoanDed(){
 }
 
 function openSetLastDay(empNo,name){document.getElementById('form-lastday').reset();document.getElementById('flastday-empno').value=empNo;document.getElementById('form-lastday-title').textContent=`Last Day — ${name}`;openPanel('panel-form-lastday');setTimeout(()=>initUploads([['upload-lastday-doc',`Employees/${name}/Offboarding`,'flastday-doc'],['upload-lastday-visa',`Employees/${name}/Final Exit`,'flastday-visadoc'],['upload-lastday-ticket',`Employees/${name}/Tickets`,'flastday-ticket']]),100);}
+async function submitLoan(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const dedType=document.getElementById('floan-dedtype')?.value||'auto';
+  const d={empNo:g('floan-empno'),loanDate:g('floan-date'),loanAmount:g('floan-amount'),
+    months:g('floan-months'),notes:g('floan-notes'),deductionType:dedType};
+  if(!d.loanAmount||parseFloat(d.loanAmount)<=0){toast('Enter valid amount','err');return;}
+  if(!d.months||parseInt(d.months)<1){toast('Enter repayment months','err');return;}
+  if(dedType==='manual'){
+    const inputs=document.querySelectorAll('.manual-month-amt');
+    d.manualAmounts=Array.from(inputs).map(el=>el.value||'0');
+  }
+  const btn=document.querySelector('#panel-form-loan .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  try{
+    const r=await API.addLoan(d);
+    toast(r.msg||'✅ Loan recorded','ok');
+    document.getElementById('form-loan').reset();
+    const mc=document.getElementById('floan-manual-fields');if(mc)mc.innerHTML='';
+    closePanel('panel-form-loan');
+  }catch(e){toast(e.message,'err');}
+  finally{if(btn){btn.disabled=false;btn.textContent='✅ Record Loan';}}
+}
+
+async function submitAbsence(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const d={empNo:g('fabs-empno'),startDate:g('fabs-start'),endDate:g('fabs-end'),reason:g('fabs-reason')};
+  if(!d.startDate||!d.endDate){toast('Fill start and end dates','err');return;}
+  try{
+    const r=await API.addAbsence(d);
+    toast(r.msg||'✅ Absence recorded','ok');
+    document.getElementById('form-abs').reset();
+    closePanel('panel-form-abs');
+    if(_currentRecordsEmpNo) setTimeout(()=>loadEmpRecords(_currentRecordsEmpNo),500);
+  }catch(e){toast(e.message,'err');}
+}
+
+async function submitHolidayRep(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const d={empNo:g('fholrep-empno'),holType:g('fholrep-type'),
+    scenario:g('fholrep-scenario'),holStart:g('fholrep-start'),holEnd:g('fholrep-end')};
+  if(!d.holStart||!d.holEnd){toast('Fill start and end dates','err');return;}
+  try{
+    const r=await API.addHolidayRep(d);
+    toast(r.msg||'✅ Recorded','ok');
+    document.getElementById('form-holrep').reset();
+    closePanel('panel-form-holrep');
+  }catch(e){toast(e.message,'err');}
+}
+
+function onLoanSelect(){
+  const sel=document.getElementById('floanded-loanselect');
+  const opt=sel?.options[sel.selectedIndex];
+  const amt=opt?.dataset?.amount;
+  const month=opt?.dataset?.month;
+  if(amt) document.getElementById('floanded-amount').value=amt;
+  const nm=document.getElementById('floanded-nextmonth');
+  if(nm) nm.textContent=month?`Next deduction: ${month}`:'';
+  const lid=document.getElementById('floanded-loanid');
+  if(lid) lid.value=sel?.value||'';
+}
+
+
 async function submitLastDay(){const g=id=>document.getElementById(id)?.value?.trim()||'';const d={empNo:g('flastday-empno'),lastWorkingDate:g('flastday-date'),exitReason:g('flastday-reason'),finalExitRequired:g('flastday-finalexit'),terminationDoc:g('flastday-doc'),finalExitVisaDoc:g('flastday-visadoc'),finalExitTicket:g('flastday-ticket')};if(!d.lastWorkingDate){toast('Date required','err');return;}try{const r=await API.call('setLastDay',d);toast(r.msg||'Last day set','ok');closePanel('panel-form-lastday');}catch(e){toast(e.message,'err');}}
 
 // ── NEW HIRES ──────────────────────────────────────────────
@@ -500,6 +590,53 @@ async function loadHires(filter){
     el.innerHTML=list.map((h)=>`<div class="emp-card" onclick="openHire(${State.hires.indexOf(h)})"><div class="emp-avatar" style="background:${T[h.status]||'#1a237e'}">${(h.nameEn||'?')[0].toUpperCase()}</div><div style="flex:1;min-width:0"><div class="emp-name">${h.nameEn}<span class="emp-badge" style="background:${C[h.status]};color:${T[h.status]}">${h.status}</span></div><div class="emp-meta">${h.hireType} · ${h.natType} · ${h.position||'—'}</div></div><div style="color:var(--muted);font-size:20px">›</div></div>`).join('');
   }catch(e){document.getElementById('hire-list').innerHTML=`<div class="empty"><div class="empty-icon">❌</div><p>${e.message}</p></div>`;}
 }
+
+function openAddLoan(empNo,name){
+  document.getElementById('form-loan').reset();
+  document.getElementById('floan-empno').value=empNo;
+  document.getElementById('floan-date').value=new Date().toISOString().split('T')[0];
+  const mc=document.getElementById('floan-manual-fields'); if(mc) mc.innerHTML='';
+  document.getElementById('form-loan-title').textContent=`Loan — ${name}`;
+  openPanel('panel-form-loan');
+}
+
+async function openRecLoanDed(empNo,name){
+  document.getElementById('form-loanded').reset();
+  document.getElementById('floanded-empno').value=empNo;
+  document.getElementById('floanded-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('form-loanded-title').textContent=`Loan Deduction — ${name}`;
+  const sel=document.getElementById('floanded-loanselect');
+  sel.innerHTML='<option value="">Loading loans…</option>';
+  document.getElementById('floanded-amount').value='';
+  document.getElementById('floanded-nextmonth').textContent='';
+  try{
+    const loans=await API.getEmployeeLoans(empNo);
+    if(!loans.length){
+      sel.innerHTML='<option value="">No active loans found</option>';
+    } else {
+      sel.innerHTML='<option value="">— Select Loan —</option>'+
+        loans.map(l=>`<option value="${l.loanId}" data-amount="${l.nextAmount}" data-month="${l.nextMonth}">
+          ${l.loanId} · SAR ${parseFloat(l.amount).toLocaleString()} · ${l.pendingCount} payments left
+        </option>`).join('');
+    }
+  }catch(e){sel.innerHTML='<option value="">Error loading loans</option>';}
+  openPanel('panel-form-loanded');
+}
+
+function openAddAbsence(empNo,name){
+  document.getElementById('form-abs').reset();
+  document.getElementById('fabs-empno').value=empNo;
+  document.getElementById('form-abs-title').textContent=`Absence — ${name}`;
+  openPanel('panel-form-abs');
+}
+
+function openAddHolidayRep(empNo,name){
+  document.getElementById('form-holrep').reset();
+  document.getElementById('fholrep-empno').value=empNo;
+  document.getElementById('form-holrep-title').textContent=`Holiday Replacement — ${name}`;
+  openPanel('panel-form-holrep');
+}
+
 
 function openHire(idx){
   const h=State.hires[idx]; if(!h) return; State.currentHire=h;

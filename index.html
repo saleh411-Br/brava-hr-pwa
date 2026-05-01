@@ -613,14 +613,18 @@
       <div class="form-row">
         <div class="form-group"><label>Type *</label>
           <select id="fsal-type"><option value="Increase">Increase ↑</option><option value="Decrease">Decrease ↓</option></select></div>
-        <div class="form-group"><label>Field *</label>
-          <select id="fsal-field"><option value="Basic Salary">Basic Salary</option><option value="Housing Allowance">Housing Allowance</option><option value="Food Allowance">Food Allowance</option><option value="Other Incentives">Other Incentives</option></select></div>
+        <div class="form-group"><label>Effective Date *</label><input id="fsal-date" type="date" /></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Enter amounts for each field you want to adjust. Leave blank to skip.</p>
+      <div class="form-row">
+        <div class="form-group"><label>Basic Salary (SAR)</label><input id="fsal-basic" type="number" step="0.01" placeholder="0.00" /></div>
+        <div class="form-group"><label>Housing Allowance (SAR)</label><input id="fsal-housing" type="number" step="0.01" placeholder="0.00" /></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Date *</label><input id="fsal-date" type="date" /></div>
-        <div class="form-group"><label>Amount (SAR) *</label><input id="fsal-amount" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Food Allowance (SAR)</label><input id="fsal-food" type="number" step="0.01" placeholder="0.00" /></div>
+        <div class="form-group"><label>Other Incentives (SAR)</label><input id="fsal-other" type="number" step="0.01" placeholder="0.00" /></div>
       </div>
-      <div class="form-group"><label>Notes</label><input id="fsal-notes" /></div>
+      <div class="form-group"><label>Notes</label><input id="fsal-notes" placeholder="Reason for adjustment…" /></div>
       <button class="btn btn-primary" onclick="submitSalaryAdj()">✅ Apply Adjustment</button>
     </form>
   </div>
@@ -637,9 +641,17 @@
       <input type="hidden" id="floan-empno" />
       <div class="form-row">
         <div class="form-group"><label>Loan Date *</label><input id="floan-date" type="date" /></div>
-        <div class="form-group"><label>Amount (SAR) *</label><input id="floan-amount" type="number" step="0.01" /></div>
+        <div class="form-group"><label>Amount (SAR) *</label><input id="floan-amount" type="number" step="0.01" oninput="onLoanDedTypeChange()" /></div>
       </div>
-      <div class="form-group"><label>Repayment Months *</label><input id="floan-months" type="number" min="1" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Repayment Months *</label><input id="floan-months" type="number" min="1" oninput="onLoanDedTypeChange()" /></div>
+        <div class="form-group"><label>Deduction Schedule</label>
+          <select id="floan-dedtype" onchange="onLoanDedTypeChange()">
+            <option value="auto">Auto (equal monthly)</option>
+            <option value="manual">Manual (set each month)</option>
+          </select></div>
+      </div>
+      <div id="floan-manual-fields"></div>
       <div class="form-group"><label>Notes</label><input id="floan-notes" /></div>
       <button class="btn btn-primary" onclick="submitLoan()">✅ Record Loan</button>
     </form>
@@ -724,6 +736,32 @@
     <div class="form-group"><label>Joining Date *</label><input id="convert-joining" type="date" /></div>
     <p style="font-size:11px;color:var(--amber);margin-bottom:12px">⚠️ This will create a new employee record and mark the hire as Converted.</p>
     <button class="btn btn-primary" onclick="submitConvertHire()">👤 Convert to Employee</button>
+  </div>
+</div>
+
+
+<!-- Return from Vacation Panel -->
+<div id="panel-form-return" class="panel">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel('panel-form-return')">‹</button>
+    <span id="panel-return-title" class="panel-title">↩ Return from Vacation</span>
+  </div>
+  <div class="panel-body">
+    <input type="hidden" id="freturn-empno" />
+    <div class="card" style="margin-bottom:16px">
+      <div class="form-group" style="margin-bottom:0">
+        <label style="color:var(--muted)">Scheduled Return Date</label>
+        <p id="freturn-scheduled" style="font-size:16px;font-weight:700;color:var(--navy)"></p>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Actual Return Date *</label>
+      <input id="freturn-date" type="date" />
+    </div>
+    <p style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px">
+      If the actual return date differs from the scheduled date, you will be prompted to confirm and a note will be added automatically.
+    </p>
+    <button class="btn btn-primary" onclick="submitReturn()">✅ Confirm Return</button>
   </div>
 </div>
 
